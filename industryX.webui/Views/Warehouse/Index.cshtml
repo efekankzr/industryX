@@ -1,0 +1,104 @@
+﻿@model IEnumerable<IndustryX.Domain.Entities.Warehouse>
+@{
+    ViewData["Title"] = "Warehouse Management";
+}
+
+<div class="my-4 p-4 bg-light shadow-sm rounded">
+    <h2 class="text-primary text-center mb-3">
+        <i class="fas fa-warehouse"></i> Warehouse Management
+    </h2>
+    <hr />
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <p class="text-secondary my-auto">You can manage all warehouses and default selections here.</p>
+        <div class="d-flex gap-2">
+            <a asp-action="Create" class="btn btn-success">
+                <i class="fas fa-plus-circle"></i> Add New Warehouse
+            </a>
+            <button class="btn btn-warning"
+                    onclick="exportToExcel('WarehouseTable', 'Warehouse_List.xlsx', 'Warehouses')">
+                <i class="fas fa-file-excel"></i> Export to Excel
+            </button>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover text-center align-middle" id="Table">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Location</th>
+                    <th>Main for Product</th>
+                    <th>Main for Raw Material</th>
+                    <th>Main for Sales</th>
+                    <th style="width: 120px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-muted">No warehouses found.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var w in Model)
+                    {
+                        <tr>
+                            <td>@w.Name</td>
+                            <td>@w.Location</td>
+                            <td>
+                                <input type="radio" name="product-main" value="@w.Id"
+                                @(w.IsMainForProduct ? "checked" : "")
+                                       onchange="setMainWarehouse(this.value, 'product')" />
+                            </td>
+                            <td>
+                                <input type="radio" name="raw-main" value="@w.Id"
+                                @(w.IsMainForRawMaterial ? "checked" : "")
+                                       onchange="setMainWarehouse(this.value, 'raw')" />
+                            </td>
+                            <td>
+                                <input type="radio" name="sales-main" value="@w.Id"
+                                @(w.IsMainForSalesProduct ? "checked" : "")
+                                       onchange="setMainWarehouse(this.value, 'sales')" />
+                            </td>
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@w.Id" class="btn btn-sm btn-primary me-1">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form asp-action="Delete" asp-route-id="@w.Id" method="post" class="d-inline"
+                                      onsubmit="return confirm('Are you sure you want to delete this warehouse?');">
+                                    <button type="submit" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.2/package/xlsx.full.min.js"></script>
+    <script src="/js/exportExcell.js"></script>
+
+    <script>
+        function setMainWarehouse(warehouseId, type) {
+            fetch('/Warehouse/SetMainWarehouse', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `warehouseId=${warehouseId}&type=${type}`
+            }).then(res => {
+                if (res.ok) {
+                    location.reload();
+                }
+            });
+        }
+    </script>
+}

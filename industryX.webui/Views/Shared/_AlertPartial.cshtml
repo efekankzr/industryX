@@ -1,0 +1,32 @@
+﻿@using IndustryX.WebUI.Models
+@{
+    var alertJson = TempData["Alert"] as string;
+    AlertMessage? alert = null;
+
+    if (!string.IsNullOrEmpty(alertJson))
+    {
+        alert = System.Text.Json.JsonSerializer.Deserialize<AlertMessage>(alertJson);
+    }
+}
+
+
+@if (alert != null)
+{
+    <div class="position-fixed bottom-0 end-0 m-3" style="z-index: 9999;">
+        <div class="alert alert-@alert.AlertType alert-dismissible fade show" role="alert">
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <strong>@alert.Title</strong>
+            <p>@alert.Message</p>
+        </div>
+    </div>
+
+    <script>
+        setTimeout(() => {
+            const alert = document.querySelector('.alert');
+            if (alert) {
+                const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                bsAlert.close();
+            }
+        }, 3000);
+    </script>
+}

@@ -1,0 +1,98 @@
+﻿@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var user = SignInManager.IsSignedIn(User) ? await UserManager.GetUserAsync(User) : null;
+    var isAdmin = user != null && await UserManager.IsInRoleAsync(user, "Admin");
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - IndustryX</title>
+
+    <script src="https://kit.fontawesome.com/3702fdc5dc.js" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/datatables.net-bs5/css/dataTables.bootstrap5.css" />
+
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/navbar.css" />
+</head>
+<body>
+    @if (isAdmin)
+    {
+        <button class="btn btn-dark rounded-circle d-md-none position-fixed"
+                id="mobileMenuBtn"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#mobileSidebar"
+                aria-controls="mobileSidebar">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="d-flex">
+            <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="mobileSidebar">
+                <div class="offcanvas-header bg-dark text-white">
+                    <h5 class="offcanvas-title">Admin Menu</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+                </div>
+                <div class="offcanvas-body p-0 bg-dark text-white d-flex flex-column" style="height: 100%;">
+                    <div class="flex-grow-1 overflow-auto">
+                        @await Html.PartialAsync("_AdminNavbar", user, new ViewDataDictionary(ViewData) { { "IsMobile", true } })
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-none d-md-block">
+                @await Html.PartialAsync("_AdminNavbar", user, new ViewDataDictionary(ViewData) { { "IsMobile", false } })
+            </div>
+
+            <div class="main-content flex-grow-1 p-4">
+                <main role="main">
+                    @RenderBody()
+                </main>
+                @await Html.PartialAsync("_AlertPartial")
+            </div>
+        </div>
+    }
+    else
+    {
+        @await Html.PartialAsync("_SalesNavbar", user)
+        <div class="container mt-3">
+            <main role="main">
+                @RenderBody()
+            </main>
+            @await Html.PartialAsync("_AlertPartial")
+        </div>
+    }    
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.2/xlsx.full.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.2/package/xlsx.full.min.js"></script>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="~/lib/datatables.net/js/jquery.dataTables.js"></script>
+    <script src="~/lib/datatables.net-bs5/js/dataTables.bootstrap5.js"></script>
+    <script src="~/js/barcodeGenerator.js" asp-append-version="true"></script>
+    <script src="~/js/barcodePdf.js" asp-append-version="true"></script>
+    <script src="~/js/exportExcel.js" asp-append-version="true"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        $(document).ready(function () {
+            $('#Table').DataTable({
+                language: {
+                    url: '/lib/datatables/i18n/Turkish.json'
+                }
+            });
+        });
+    </script>
+</body>
+</html>

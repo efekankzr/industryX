@@ -1,0 +1,18 @@
+﻿@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="text-center mt-5">
+    <h1 class="text-danger"><i class="fas fa-exclamation-triangle"></i> Oops!</h1>
+    <p class="lead">Something went wrong. Please try again later.</p>
+
+    <div class="alert alert-warning text-start mx-auto" style="max-width: 600px;">
+        <strong>Details:</strong><br />
+        Path: <span>@ViewBag.ExceptionPath</span><br />
+        Error: <span>@ViewBag.ExceptionMessage</span>
+    </div>
+
+    <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-3">
+        <i class="fas fa-home"></i> Go Home
+    </a>
+</div>

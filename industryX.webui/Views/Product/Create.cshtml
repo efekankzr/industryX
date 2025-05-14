@@ -1,0 +1,99 @@
+﻿@model IndustryX.WebUI.Models.ProductFormViewModel
+
+@{
+    ViewData["Title"] = "Create Product";
+}
+
+<div class="my-4 p-4 bg-light shadow-sm rounded">
+    <h2 class="text-primary text-center mb-3">
+        <i class="fas fa-boxes"></i> Create Product
+    </h2>
+    <hr />
+
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        <div class="row">
+            <!-- Left Column: Product Info -->
+            <div class="col-md-6 border-end">
+                <div class="mb-3">
+                    <label asp-for="Product.Barcode" class="form-label">Barcode</label>
+                    <div class="input-group">
+                        <input asp-for="Product.Barcode" class="form-control" id="Barcode" />
+                        <button type="button" class="btn btn-info" onclick="generateProductBarcode()">
+                            <i class="fas fa-random me-1"></i> Generate
+                        </button>
+                    </div>
+                    <span asp-validation-for="Product.Barcode" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Product.Name" class="form-label">Name</label>
+                    <input asp-for="Product.Name" class="form-control" placeholder="Enter product name" />
+                    <span asp-validation-for="Product.Name" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Product.PiecesInBox" class="form-label">Pieces In Box</label>
+                    <input asp-for="Product.PiecesInBox" class="form-control" />
+                    <span asp-validation-for="Product.PiecesInBox" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <h5 class="text-muted mb-3">Select Raw Materials</h5>
+                <table class="table table-bordered table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 80px;">Include</th>
+                            <th>Raw Material</th>
+                            <th style="width: 120px;">Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.RawMaterials.Count; i++)
+                        {
+                            var rm = Model.RawMaterials[i];
+                            <tr>
+                                <td class="text-center">
+                                    <input type="checkbox" name="Product.ProductReceipts[@i].Include" value="true" />
+                                    <input type="hidden" name="Product.ProductReceipts[@i].RawMaterialId" value="@rm.Id" />
+                                </td>
+                                <td>@rm.Name</td>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm"
+                                           name="Product.ProductReceipts[@i].Quantity" disabled />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mt-4 d-flex gap-2 justify-content-end">
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save me-1"></i> Save
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="~/js/barcodeGenerator.js"></script>
+    <script>
+        function generateProductBarcode() {
+            generateBarcode("PRD", "Barcode");
+        }
+
+        document.querySelectorAll('input[type="checkbox"][name$=".Include"]').forEach(cb => {
+            cb.addEventListener('change', function () {
+                const row = this.closest('tr');
+                const qtyInput = row.querySelector('input[name$=".Quantity"]');
+                qtyInput.disabled = !this.checked;
+                if (!this.checked) qtyInput.value = "";
+            });
+        });
+    </script>
+}

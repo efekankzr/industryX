@@ -1,0 +1,10 @@
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace IndustryX.Domain.Entities
+{
+    public class ApplicationUser : IdentityUser
+    {
+        public string Firstname { get; set; }
+        public string Surname { get; set; }
+    }
+}
