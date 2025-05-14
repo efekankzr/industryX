@@ -29,6 +29,7 @@ builder.Services.AddScoped<IProductStockService, ProductStockService>();
 builder.Services.AddScoped<IRawMaterialStockService, RawMaterialStockService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IProductionService, ProductionService>();
+builder.Services.AddScoped<IProductTransferService, ProductTransferService>();
 
 // ----------------------
 // DbContext

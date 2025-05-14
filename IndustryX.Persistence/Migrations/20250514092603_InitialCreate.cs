@@ -361,6 +361,68 @@ namespace IndustryX.Persistence.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "ProductTransfers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    TransferBarcode = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    SourceWarehouseId = table.Column<int>(type: "int", nullable: false),
+                    DestinationWarehouseId = table.Column<int>(type: "int", nullable: false),
+                    InitiatedByUserId = table.Column<string>(type: "varchar(255)", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    DeliveredByUserId = table.Column<string>(type: "varchar(255)", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ReceivedByUserId = table.Column<string>(type: "varchar(255)", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    TransferQuantityBox = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    PickedUpAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    DeliveredAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    Status = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductTransfers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductTransfers_AspNetUsers_DeliveredByUserId",
+                        column: x => x.DeliveredByUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ProductTransfers_AspNetUsers_InitiatedByUserId",
+                        column: x => x.InitiatedByUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ProductTransfers_AspNetUsers_ReceivedByUserId",
+                        column: x => x.ReceivedByUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ProductTransfers_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProductTransfers_Warehouses_DestinationWarehouseId",
+                        column: x => x.DestinationWarehouseId,
+                        principalTable: "Warehouses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProductTransfers_Warehouses_SourceWarehouseId",
+                        column: x => x.SourceWarehouseId,
+                        principalTable: "Warehouses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "RawMaterialStocks",
                 columns: table => new
                 {
@@ -407,6 +469,41 @@ namespace IndustryX.Persistence.Migrations
                         name: "FK_ProductionPauses_Productions_ProductionId",
                         column: x => x.ProductionId,
                         principalTable: "Productions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "ProductTransferDeficits",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    ProductTransferId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "varchar(255)", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    DeficitQuantity = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductTransferDeficits", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductTransferDeficits_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ProductTransferDeficits_ProductTransfers_ProductTransferId",
+                        column: x => x.ProductTransferId,
+                        principalTable: "ProductTransfers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProductTransferDeficits_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -480,6 +577,51 @@ namespace IndustryX.Persistence.Migrations
                 column: "WarehouseId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ProductTransferDeficits_ProductId",
+                table: "ProductTransferDeficits",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductTransferDeficits_ProductTransferId",
+                table: "ProductTransferDeficits",
+                column: "ProductTransferId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductTransferDeficits_UserId",
+                table: "ProductTransferDeficits",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductTransfers_DeliveredByUserId",
+                table: "ProductTransfers",
+                column: "DeliveredByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductTransfers_DestinationWarehouseId",
+                table: "ProductTransfers",
+                column: "DestinationWarehouseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductTransfers_InitiatedByUserId",
+                table: "ProductTransfers",
+                column: "InitiatedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductTransfers_ProductId",
+                table: "ProductTransfers",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductTransfers_ReceivedByUserId",
+                table: "ProductTransfers",
+                column: "ReceivedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductTransfers_SourceWarehouseId",
+                table: "ProductTransfers",
+                column: "SourceWarehouseId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RawMaterialStocks_RawMaterialId",
                 table: "RawMaterialStocks",
                 column: "RawMaterialId");
@@ -521,25 +663,31 @@ namespace IndustryX.Persistence.Migrations
                 name: "ProductStocks");
 
             migrationBuilder.DropTable(
+                name: "ProductTransferDeficits");
+
+            migrationBuilder.DropTable(
                 name: "RawMaterialStocks");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Productions");
 
             migrationBuilder.DropTable(
-                name: "Productions");
+                name: "ProductTransfers");
 
             migrationBuilder.DropTable(
                 name: "RawMaterials");
 
             migrationBuilder.DropTable(
-                name: "Warehouses");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Products");
+
+            migrationBuilder.DropTable(
+                name: "Warehouses");
         }
     }
 }

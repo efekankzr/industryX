@@ -19,7 +19,6 @@ namespace IndustryX.WebUI.Controllers
             _emailService = emailService;
         }
 
-        // GET: /Account/Login
         [HttpGet]
         public IActionResult Login() => View();
 
@@ -44,7 +43,6 @@ namespace IndustryX.WebUI.Controllers
             return View(model);
         }
 
-        // GET: /Account/Register
         [HttpGet]
         public IActionResult Register() => View();
 
@@ -84,7 +82,6 @@ namespace IndustryX.WebUI.Controllers
             return View(model);
         }
 
-        // GET: /Account/ConfirmEmail
         [HttpGet]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
@@ -102,7 +99,6 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        // POST: /Account/Logout
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
@@ -111,7 +107,6 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction("Login");
         }
 
-        // GET: /Account/AccessDenied
         [HttpGet]
         public IActionResult AccessDenied()
         {
@@ -119,7 +114,6 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction("Login");
         }
 
-        // GET: /Account/ForgotPassword
         [HttpGet]
         public IActionResult ForgotPassword() => View();
 
@@ -148,7 +142,6 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction("Login");
         }
 
-        // GET: /Account/ResetPassword
         [HttpGet]
         public IActionResult ResetPassword(string token, string email)
         {

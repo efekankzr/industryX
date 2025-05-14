@@ -194,6 +194,67 @@ namespace IndustryX.Persistence.Migrations
                     b.ToTable("ProductStocks");
                 });
 
+            modelBuilder.Entity("IndustryX.Domain.Entities.ProductTransfer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("DeliveredAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("DeliveredByUserId")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<int>("DestinationWarehouseId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("InitiatedByUserId")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime?>("PickedUpAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReceivedByUserId")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<int>("SourceWarehouseId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TransferBarcode")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("TransferQuantityBox")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeliveredByUserId");
+
+                    b.HasIndex("DestinationWarehouseId");
+
+                    b.HasIndex("InitiatedByUserId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ReceivedByUserId");
+
+                    b.HasIndex("SourceWarehouseId");
+
+                    b.ToTable("ProductTransfers");
+                });
+
             modelBuilder.Entity("IndustryX.Domain.Entities.Production", b =>
                 {
                     b.Property<int>("Id")
@@ -477,6 +538,37 @@ namespace IndustryX.Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ProductTransferDeficit", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DeficitQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductTransferId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductTransferId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ProductTransferDeficits");
+                });
+
             modelBuilder.Entity("IndustryX.Domain.Entities.ProductReceipt", b =>
                 {
                     b.HasOne("IndustryX.Domain.Entities.Product", "Product")
@@ -513,6 +605,51 @@ namespace IndustryX.Persistence.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("Warehouse");
+                });
+
+            modelBuilder.Entity("IndustryX.Domain.Entities.ProductTransfer", b =>
+                {
+                    b.HasOne("IndustryX.Domain.Entities.ApplicationUser", "DeliveredByUser")
+                        .WithMany()
+                        .HasForeignKey("DeliveredByUserId");
+
+                    b.HasOne("IndustryX.Domain.Entities.Warehouse", "DestinationWarehouse")
+                        .WithMany()
+                        .HasForeignKey("DestinationWarehouseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("IndustryX.Domain.Entities.ApplicationUser", "InitiatedByUser")
+                        .WithMany()
+                        .HasForeignKey("InitiatedByUserId");
+
+                    b.HasOne("IndustryX.Domain.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("IndustryX.Domain.Entities.ApplicationUser", "ReceivedByUser")
+                        .WithMany()
+                        .HasForeignKey("ReceivedByUserId");
+
+                    b.HasOne("IndustryX.Domain.Entities.Warehouse", "SourceWarehouse")
+                        .WithMany()
+                        .HasForeignKey("SourceWarehouseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DeliveredByUser");
+
+                    b.Navigation("DestinationWarehouse");
+
+                    b.Navigation("InitiatedByUser");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("ReceivedByUser");
+
+                    b.Navigation("SourceWarehouse");
                 });
 
             modelBuilder.Entity("IndustryX.Domain.Entities.Production", b =>
@@ -605,6 +742,31 @@ namespace IndustryX.Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ProductTransferDeficit", b =>
+                {
+                    b.HasOne("IndustryX.Domain.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("IndustryX.Domain.Entities.ProductTransfer", "ProductTransfer")
+                        .WithMany()
+                        .HasForeignKey("ProductTransferId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("IndustryX.Domain.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("ProductTransfer");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("IndustryX.Domain.Entities.Product", b =>

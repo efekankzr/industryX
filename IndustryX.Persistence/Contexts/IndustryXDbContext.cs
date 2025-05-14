@@ -18,6 +18,8 @@ namespace IndustryX.Persistence.Contexts
         public DbSet<LaborCost> LaborCosts { get; set; }
         public DbSet<Production> Productions { get; set; }
         public DbSet<ProductionPause> ProductionPauses { get; set; }
+        public DbSet<ProductTransfer> ProductTransfers { get; set; }
+        public DbSet<ProductTransferDeficit> ProductTransferDeficits { get; set; }
 
 
 
