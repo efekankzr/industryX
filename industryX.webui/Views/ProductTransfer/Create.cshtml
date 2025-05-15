@@ -9,11 +9,12 @@
     </h2>
     <hr />
 
-    <form asp-action="Create" method="post">
+    <form asp-action="Create" method="post" onsubmit="return validateTransferForm();">
         <div class="row mb-3">
             <div class="col-md-6">
                 <label asp-for="ProductId" class="form-label">Product</label>
-                <select asp-for="ProductId" class="form-select" asp-items="@(new SelectList(Model.Products, "Id", "Name"))">
+                <select asp-for="ProductId" class="form-select" required
+                        asp-items="@(new SelectList(Model.Products, "Id", "Name"))">
                     <option value="">-- Select Product --</option>
                 </select>
                 <span asp-validation-for="ProductId" class="text-danger small"></span>
@@ -21,7 +22,7 @@
 
             <div class="col-md-3">
                 <label asp-for="TransferQuantityBox" class="form-label">Box Quantity</label>
-                <input asp-for="TransferQuantityBox" type="number" class="form-control" min="1" />
+                <input asp-for="TransferQuantityBox" type="number" class="form-control" min="1" required />
                 <span asp-validation-for="TransferQuantityBox" class="text-danger small"></span>
             </div>
         </div>
@@ -29,7 +30,8 @@
         <div class="row mb-3">
             <div class="col-md-6">
                 <label asp-for="SourceWarehouseId" class="form-label">Source Warehouse</label>
-                <select asp-for="SourceWarehouseId" class="form-select" asp-items="@(new SelectList(Model.Warehouses, "Id", "Name"))">
+                <select asp-for="SourceWarehouseId" class="form-select" required
+                        asp-items="@(new SelectList(Model.Warehouses, "Id", "Name"))">
                     <option value="">-- Select Source --</option>
                 </select>
                 <span asp-validation-for="SourceWarehouseId" class="text-danger small"></span>
@@ -37,15 +39,16 @@
 
             <div class="col-md-6">
                 <label asp-for="DestinationWarehouseId" class="form-label">Destination Warehouse</label>
-                <select asp-for="DestinationWarehouseId" class="form-select" asp-items="@(new SelectList(Model.Warehouses, "Id", "Name"))">
+                <select asp-for="DestinationWarehouseId" class="form-select" required
+                        asp-items="@(new SelectList(Model.Warehouses, "Id", "Name"))">
                     <option value="">-- Select Destination --</option>
                 </select>
                 <span asp-validation-for="DestinationWarehouseId" class="text-danger small"></span>
             </div>
         </div>
 
-        <div class="mt-4 d-flex justify-content-end gap-2">
-            <a asp-action="Index" class="btn btn-secondary">
+        <div class="d-flex justify-content-end mt-4 gap-2">
+            <a asp-action="Index" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left me-1"></i> Cancel
             </a>
             <button type="submit" class="btn btn-success">
@@ -57,4 +60,16 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function validateTransferForm() {
+            const source = document.getElementById("SourceWarehouseId").value;
+            const destination = document.getElementById("DestinationWarehouseId").value;
+            if (source === destination && source !== "") {
+                alert("Source and destination warehouses cannot be the same.");
+                return false;
+            }
+            return true;
+        }
+    </script>
 }

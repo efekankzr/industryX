@@ -67,6 +67,12 @@ namespace IndustryX.Application.Services
             if (production.BoxQuantity <= 0 || production.WorkerCount <= 0)
                 return (false, "Box quantity and worker count must be greater than zero.");
 
+            var mainProdWarehouse = (await _warehouseRepository.GetAllAsync())
+                .FirstOrDefault(w => w.IsMainForProduct);
+
+            if (mainProdWarehouse == null)
+                return (false, "Main warehouse for products not found.");
+
             var mainRawWarehouse = (await _warehouseRepository.GetAllAsync())
                 .FirstOrDefault(w => w.IsMainForRawMaterial);
 

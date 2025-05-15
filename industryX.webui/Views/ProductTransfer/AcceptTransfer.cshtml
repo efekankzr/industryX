@@ -1,0 +1,39 @@
+﻿@model IndustryX.WebUI.ViewModels.AcceptTransferViewModel
+
+@{
+    ViewData["Title"] = "Accept Product Transfer";
+}
+
+<div class="my-4 p-4 bg-light shadow-sm rounded">
+    <h2 class="text-primary text-center mb-3">
+        <i class="fas fa-people-carry"></i> Accept Product Transfer
+    </h2>
+    <hr />
+
+    <form asp-action="AcceptTransfer" method="post">
+        <div class="mb-3">
+            <label asp-for="TransferBarcode" class="form-label">Transfer Barcode</label>
+            <input asp-for="TransferBarcode" class="form-control" placeholder="e.g., TR-ABC12345" />
+            <span asp-validation-for="TransferBarcode" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="DeliveredBoxCount" class="form-label">Delivered Box Count</label>
+            <input asp-for="DeliveredBoxCount" type="number" min="1" class="form-control" />
+            <span asp-validation-for="DeliveredBoxCount" class="text-danger small"></span>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back
+            </a>
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-check-circle me-1"></i> Accept Transfer
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

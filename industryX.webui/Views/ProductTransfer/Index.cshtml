@@ -1,0 +1,89 @@
+﻿@model IEnumerable<IndustryX.Domain.Entities.ProductTransfer>
+@{
+    ViewData["Title"] = "Product Transfers";
+}
+
+<div class="my-4 p-4 bg-light shadow-sm rounded">
+    <h2 class="text-primary text-center mb-3">
+        <i class="fas fa-exchange-alt"></i> Product Transfers
+    </h2>
+    <hr />
+
+    <div class="d-flex justify-content-between mb-3">
+        <p class="text-secondary my-auto">All product transfer records are listed below.</p>
+        <a asp-action="Create" class="btn btn-success">
+            <i class="fas fa-plus-circle me-1"></i> New Transfer
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover text-center align-middle" id="Table">
+            <thead class="table-dark">
+                <tr>
+                    <th>Transfer Code</th>
+                    <th>Product</th>
+                    <th>Boxes</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Status</th>
+                    <th>Initiated</th>
+                    <th style="width: 150px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in Model)
+                {
+                    <tr>
+                        <td>@t.TransferBarcode</td>
+                        <td>@t.Product.Name</td>
+                        <td>@t.TransferQuantityBox</td>
+                        <td>@t.SourceWarehouse.Name</td>
+                        <td>@t.DestinationWarehouse.Name</td>
+                        <td>
+                            @switch (t.Status)
+                            {
+                                case TransferStatus.Created:
+                                    <span class="badge bg-secondary">Created</span>
+                                    break;
+                                case TransferStatus.InTransit:
+                                    <span class="badge bg-warning text-dark">In Transit</span>
+                                    break;
+                                case TransferStatus.Delivered:
+                                    <span class="badge bg-success">Delivered</span>
+                                    break;
+                            }
+                        </td>
+                        <td>@t.CreatedAt.ToString("g")</td>
+                        <td>
+                            <a asp-action="Detail" asp-route-id="@t.Id" class="btn btn-sm btn-primary me-1">
+                                <i class="fas fa-eye"></i>
+                            </a>
+
+                            @* Örnek butonlar - tamamlandıkça aktif edilecek *@
+                            @* 
+                            @if (t.Status == TransferStatus.Created)
+                            {
+                                <form asp-action="Pickup" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@t.Id" />
+                                    <button class="btn btn-sm btn-warning">
+                                        <i class="fas fa-truck"></i>
+                                    </button>
+                                </form>
+                            }
+                            else if (t.Status == TransferStatus.InTransit)
+                            {
+                                <form asp-action="Deliver" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@t.Id" />
+                                    <button class="btn btn-sm btn-success">
+                                        <i class="fas fa-box"></i>
+                                    </button>
+                                </form>
+                            }
+                            *@
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
