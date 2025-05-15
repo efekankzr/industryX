@@ -1,0 +1,107 @@
+﻿@model IndustryX.WebUI.ViewModels.ProductTransferFilterViewModel
+@using IndustryX.Domain.Entities
+@{
+    ViewData["Title"] = "Product Transfer Report";
+}
+
+<div class="my-4 p-4 bg-light shadow-sm rounded">
+    <h2 class="text-primary text-center mb-3">
+        <i class="fas fa-file-alt"></i> Product Transfer Report
+    </h2>
+    <hr />
+
+    <form method="post" asp-action="Report" class="row g-3 mb-4">
+        <div class="col-md-3">
+            <label asp-for="SourceWarehouseId" class="form-label">Source Warehouse</label>
+            <select asp-for="SourceWarehouseId" class="form-select" asp-items="@(new SelectList(Model.Warehouses, "Id", "Name", Model.SourceWarehouseId))">
+                <option value="">All</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label asp-for="DestinationWarehouseId" class="form-label">Destination Warehouse</label>
+            <select asp-for="DestinationWarehouseId" class="form-select" asp-items="@(new SelectList(Model.Warehouses, "Id", "Name", Model.DestinationWarehouseId))">
+                <option value="">All</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label asp-for="Status" class="form-label">Status</label>
+            <select asp-for="Status" class="form-select">
+                <option value="">All</option>
+                @foreach (var status in Enum.GetValues(typeof(TransferStatus)))
+                {
+                    <option value="@status" selected="@(Model.Status?.ToString() == status.ToString() ? "selected" : null)">
+                        @status
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label asp-for="StartDate" class="form-label">Start Date</label>
+            <input asp-for="StartDate" type="date" class="form-control" />
+        </div>
+
+        <div class="col-md-2">
+            <label asp-for="EndDate" class="form-label">End Date</label>
+            <input asp-for="EndDate" type="date" class="form-control" />
+        </div>
+
+        <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search me-1"></i> Filter
+            </button>
+            <a asp-action="Report" class="btn btn-secondary">
+                <i class="fas fa-undo me-1"></i> Reset
+            </a>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>Barcode</th>
+                    <th>Product</th>
+                    <th>Boxes</th>
+                    <th>Source</th>
+                    <th>Destination</th>
+                    <th>Status</th>
+                    <th>Initiated</th>
+                    <th>Picked Up</th>
+                    <th>Delivered</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Transfers.Any())
+                {
+                    <tr>
+                        <td colspan="9" class="text-muted">No transfers found.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var t in Model.Transfers)
+                    {
+                        <tr>
+                            <td>@t.TransferBarcode</td>
+                            <td>@t.Product.Name</td>
+                            <td>@t.TransferQuantityBox</td>
+                            <td>@t.SourceWarehouse.Name</td>
+                            <td>@t.DestinationWarehouse.Name</td>
+                            <td>@t.Status</td>
+                            <td>@t.CreatedAt.ToString("g")</td>
+                            <td>@(t.PickedUpAt?.ToString("g") ?? "-")</td>
+                            <td>@(t.DeliveredAt?.ToString("g") ?? "-")</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

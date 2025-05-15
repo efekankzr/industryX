@@ -10,28 +10,48 @@
     </h2>
     <hr />
 
-    <form asp-action="AcceptTransfer" method="post">
+    <form asp-action="AcceptTransfer" method="get">
         <div class="mb-3">
-            <label asp-for="TransferBarcode" class="form-label">Transfer Barcode</label>
-            <input asp-for="TransferBarcode" class="form-control" placeholder="e.g., TR-ABC12345" />
-            <span asp-validation-for="TransferBarcode" class="text-danger small"></span>
-        </div>
-
-        <div class="mb-3">
-            <label asp-for="DeliveredBoxCount" class="form-label">Delivered Box Count</label>
-            <input asp-for="DeliveredBoxCount" type="number" min="1" class="form-control" />
-            <span asp-validation-for="DeliveredBoxCount" class="text-danger small"></span>
-        </div>
-
-        <div class="d-flex justify-content-between">
-            <a asp-action="Index" class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Back
-            </a>
-            <button type="submit" class="btn btn-success">
-                <i class="fas fa-check-circle me-1"></i> Accept Transfer
-            </button>
+            <label for="TransferBarcode" class="form-label">Scan or Enter Barcode</label>
+            <div class="input-group">
+                <input type="text" name="barcode" class="form-control" value="@Model.TransferBarcode" />
+                <button type="submit" class="btn btn-outline-secondary">Fetch</button>
+            </div>
         </div>
     </form>
+
+    @if (!string.IsNullOrEmpty(Model.ProductName))
+    {
+        <form asp-action="AcceptTransfer" method="post">
+            <input type="hidden" asp-for="TransferBarcode" />
+            <div class="mb-3">
+                <label class="form-label">Product</label>
+                <input type="text" value="@Model.ProductName" class="form-control" readonly />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Quantity (Boxes)</label>
+                <input type="text" value="@Model.QuantityBox" class="form-control" readonly />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Source</label>
+                <input type="text" value="@Model.SourceWarehouse" class="form-control" readonly />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Destination</label>
+                <input type="text" value="@Model.DestinationWarehouse" class="form-control" readonly />
+            </div>
+            <div class="mb-3">
+                <label asp-for="DeliveredBoxCount" class="form-label">Delivered Box Count</label>
+                <input asp-for="DeliveredBoxCount" type="number" min="1" class="form-control" />
+                <span asp-validation-for="DeliveredBoxCount" class="text-danger small"></span>
+            </div>
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-check-circle me-1"></i> Accept Transfer
+                </button>
+            </div>
+        </form>
+    }
 </div>
 
 @section Scripts {

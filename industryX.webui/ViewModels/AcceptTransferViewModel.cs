@@ -5,12 +5,17 @@ namespace IndustryX.WebUI.ViewModels
     public class AcceptTransferViewModel
     {
         [Required]
-        [Display(Name = "Transfer Barcode")]
-        public string TransferBarcode { get; set; } = null!;
+        public string TransferBarcode { get; set; }
 
         [Required]
-        [Range(1, int.MaxValue, ErrorMessage = "Please enter a valid box count.")]
-        [Display(Name = "Delivered Box Count")]
+        [Range(1, int.MaxValue, ErrorMessage = "Box count must be at least 1")]
         public int DeliveredBoxCount { get; set; }
+
+        // Read-only display properties
+        public string ProductName { get; set; }
+        public int QuantityBox { get; set; }
+        public string SourceWarehouse { get; set; }
+        public string DestinationWarehouse { get; set; }
     }
+
 }

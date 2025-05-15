@@ -50,6 +50,40 @@ namespace IndustryX.Application.Services
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
+        public async Task<IEnumerable<ProductTransfer>> GetFilteredAsync(
+            int? sourceWarehouseId,
+            int? destinationWarehouseId,
+            TransferStatus? status,
+            DateTime? startDate,
+            DateTime? endDate)
+        {
+            var query = _transferRepository.GetQueryable();
+
+            query = query
+                .Include(x => x.Product)
+                .Include(x => x.SourceWarehouse)
+                .Include(x => x.DestinationWarehouse)
+                .Include(x => x.InitiatedByUser)
+                .Include(x => x.DeliveredByUser)
+                .Include(x => x.ReceivedByUser);
+
+            if (sourceWarehouseId.HasValue)
+                query = query.Where(x => x.SourceWarehouseId == sourceWarehouseId.Value);
+
+            if (destinationWarehouseId.HasValue)
+                query = query.Where(x => x.DestinationWarehouseId == destinationWarehouseId.Value);
+
+            if (status.HasValue)
+                query = query.Where(x => x.Status == status.Value);
+
+            if (startDate.HasValue)
+                query = query.Where(x => x.CreatedAt >= startDate.Value.Date);
+
+            if (endDate.HasValue)
+                query = query.Where(x => x.CreatedAt <= endDate.Value.Date.AddDays(1).AddSeconds(-1));
+
+            return await query.OrderByDescending(x => x.CreatedAt).ToListAsync();
+        }
 
         public async Task<(bool Success, string? Error)> CreateAsync(
             int sourceWarehouseId,
@@ -102,6 +136,19 @@ namespace IndustryX.Application.Services
             await _transferRepository.SaveAsync();
 
             return (true, null);
+        }
+
+        public async Task<ProductTransfer?> GetByBarcodeAsync(string barcode)
+        {
+            return await _transferRepository
+                .GetQueryable()
+                .Include(t => t.Product)
+                .Include(t => t.SourceWarehouse)
+                .Include(t => t.DestinationWarehouse)
+                .Include(t => t.InitiatedByUser)
+                .Include(t => t.DeliveredByUser)
+                .Include(t => t.ReceivedByUser)
+                .FirstOrDefaultAsync(t => t.TransferBarcode == barcode);
         }
 
         public async Task<(bool Success, string? Error)> AcceptTransferAsync(string barcode, int deliveredBoxCount, string deliveredByUserId)

@@ -1,4 +1,6 @@
-﻿@{
+﻿@model IndustryX.WebUI.ViewModels.CompleteTransferViewModel
+
+@{
     ViewData["Title"] = "Complete Product Transfer";
 }
 
@@ -8,28 +10,53 @@
     </h2>
     <hr />
 
-    <form asp-action="CompleteTransfer" method="post">
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label for="barcode" class="form-label">Transfer Barcode</label>
-                <input type="text" class="form-control" id="barcode" name="barcode" required placeholder="Enter transfer barcode" />
+    <form method="get" asp-action="CompleteTransfer">
+        <div class="mb-3">
+            <label class="form-label">Scan or Enter Barcode</label>
+            <div class="input-group">
+                <input type="text" name="barcode" class="form-control" placeholder="e.g., TR-XYZ12345" value="@Model.Barcode" />
+                <button class="btn btn-outline-secondary" type="submit">Fetch</button>
             </div>
-
-            <div class="col-md-6">
-                <label for="receivedBoxCount" class="form-label">Received Box Count</label>
-                <input type="number" class="form-control" id="receivedBoxCount" name="receivedBoxCount" min="1" required placeholder="Enter received box count" />
-            </div>
-        </div>
-
-        <div class="d-flex justify-content-between">
-            <a asp-action="Index" class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Back to List
-            </a>
-            <button type="submit" class="btn btn-success">
-                <i class="fas fa-check me-1"></i> Complete Transfer
-            </button>
         </div>
     </form>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ProductName))
+    {
+        <form asp-action="CompleteTransfer" method="post">
+            <input type="hidden" asp-for="Barcode" />
+
+            <div class="mb-3">
+                <label class="form-label">Product</label>
+                <input type="text" class="form-control" value="@Model.ProductName" readonly />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Total Box Count</label>
+                <input type="text" class="form-control" value="@Model.TotalBoxCount" readonly />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Source Warehouse</label>
+                <input type="text" class="form-control" value="@Model.SourceWarehouse" readonly />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Destination Warehouse</label>
+                <input type="text" class="form-control" value="@Model.DestinationWarehouse" readonly />
+            </div>
+            <div class="mb-3">
+                <label asp-for="ReceivedBoxCount" class="form-label">Received Box Count</label>
+                <input asp-for="ReceivedBoxCount" class="form-control" min="1" />
+                <span asp-validation-for="ReceivedBoxCount" class="text-danger small"></span>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Back
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-check me-1"></i> Complete Transfer
+                </button>
+            </div>
+        </form>
+    }
 </div>
 
 @section Scripts {
