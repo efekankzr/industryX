@@ -1,10 +1,12 @@
 ﻿using IndustryX.Application.Interfaces;
 using IndustryX.Domain.Entities;
 using IndustryX.WebUI.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IndustryX.WebUI.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class GeneralSettingsController : BaseController
     {
         private readonly ILaborCostService _laborCostService;

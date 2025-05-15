@@ -1,8 +1,10 @@
 ﻿using IndustryX.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IndustryX.WebUI.Controllers
 {
+    [Authorize(Roles = "Admin, ProductionManager")]
     public class RawMaterialStockController : BaseController
     {
         private readonly IRawMaterialStockService _stockService;
@@ -19,6 +21,7 @@ namespace IndustryX.WebUI.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AdjustStock(int id, decimal amount, string operation)
         {
             if (amount <= 0)
@@ -43,6 +46,7 @@ namespace IndustryX.WebUI.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> SetCriticalStock(int id, decimal critical)
         {
             if (critical < 0)

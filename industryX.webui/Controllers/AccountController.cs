@@ -107,14 +107,12 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction("Login");
         }
 
-        [HttpGet]
         public IActionResult AccessDenied()
         {
             ShowAlert("Access Denied", "You are not authorized to access this page.", "danger");
-            return RedirectToAction("Login");
+            return View();
         }
 
-        [HttpGet]
         public IActionResult ForgotPassword() => View();
 
         [HttpPost]
@@ -142,7 +140,6 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction("Login");
         }
 
-        [HttpGet]
         public IActionResult ResetPassword(string token, string email)
         {
             if (token == null || email == null)

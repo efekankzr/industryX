@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IndustryX.Persistence.Migrations
 {
     [DbContext(typeof(IndustryXDbContext))]
-    [Migration("20250514092603_InitialCreate")]
+    [Migration("20250515155935_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -45,6 +45,7 @@ namespace IndustryX.Persistence.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Firstname")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<bool>("LockoutEnabled")
@@ -74,6 +75,7 @@ namespace IndustryX.Persistence.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("Surname")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<bool>("TwoFactorEnabled")
@@ -83,6 +85,9 @@ namespace IndustryX.Persistence.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
 
+                    b.Property<int?>("WarehouseId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
@@ -91,6 +96,8 @@ namespace IndustryX.Persistence.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
+
+                    b.HasIndex("WarehouseId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -123,12 +130,14 @@ namespace IndustryX.Persistence.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Barcode")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<decimal>("MaterialPrice")
                         .HasColumnType("decimal(65,30)");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<int>("PiecesInBox")
@@ -218,6 +227,7 @@ namespace IndustryX.Persistence.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("InitiatedByUserId")
+                        .IsRequired()
                         .HasColumnType("varchar(255)");
 
                     b.Property<DateTime?>("PickedUpAt")
@@ -236,6 +246,7 @@ namespace IndustryX.Persistence.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("TransferBarcode")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<int>("TransferQuantityBox")
@@ -279,6 +290,7 @@ namespace IndustryX.Persistence.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Notes")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<int>("ProductId")
@@ -339,9 +351,11 @@ namespace IndustryX.Persistence.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Barcode")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<decimal>("Price")
@@ -399,9 +413,11 @@ namespace IndustryX.Persistence.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Location")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
@@ -559,6 +575,7 @@ namespace IndustryX.Persistence.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
@@ -570,6 +587,15 @@ namespace IndustryX.Persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("ProductTransferDeficits");
+                });
+
+            modelBuilder.Entity("IndustryX.Domain.Entities.ApplicationUser", b =>
+                {
+                    b.HasOne("IndustryX.Domain.Entities.Warehouse", "Warehouse")
+                        .WithMany()
+                        .HasForeignKey("WarehouseId");
+
+                    b.Navigation("Warehouse");
                 });
 
             modelBuilder.Entity("IndustryX.Domain.Entities.ProductReceipt", b =>
@@ -624,7 +650,9 @@ namespace IndustryX.Persistence.Migrations
 
                     b.HasOne("IndustryX.Domain.Entities.ApplicationUser", "InitiatedByUser")
                         .WithMany()
-                        .HasForeignKey("InitiatedByUserId");
+                        .HasForeignKey("InitiatedByUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("IndustryX.Domain.Entities.Product", "Product")
                         .WithMany()
@@ -763,7 +791,9 @@ namespace IndustryX.Persistence.Migrations
 
                     b.HasOne("IndustryX.Domain.Entities.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Product");
 

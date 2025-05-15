@@ -1,5 +1,7 @@
 using IndustryX.Application.Interfaces;
 using IndustryX.Application.Services;
+using IndustryX.Application.Services.Implementations;
+using IndustryX.Application.Services.Interfaces;
 using IndustryX.Domain.Entities;
 using IndustryX.Domain.Interfaces;
 using IndustryX.Infrastructure.Interfaces;
@@ -7,12 +9,8 @@ using IndustryX.Infrastructure.Services;
 using IndustryX.Infrastructure.Settings;
 using IndustryX.Persistence.Contexts;
 using IndustryX.Persistence.Repositories;
-using IndustryX.WebUI.Middlewares;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc;
-using IndustryX.Application.Services.Interfaces;
-using IndustryX.Application.Services.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
 
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRawMaterialService, RawMaterialService>();
 builder.Services.AddScoped<IWarehouseService, WarehouseService>();
 builder.Services.AddScoped<ILaborCostService, LaborCostService>();

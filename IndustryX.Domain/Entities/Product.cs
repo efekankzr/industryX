@@ -1,4 +1,6 @@
-﻿namespace IndustryX.Domain.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace IndustryX.Domain.Entities
 {
     public class Product
     {

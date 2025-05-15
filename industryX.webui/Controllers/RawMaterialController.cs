@@ -1,9 +1,11 @@
 ﻿using IndustryX.Application.Interfaces;
 using IndustryX.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IndustryX.WebUI.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class RawMaterialController : BaseController
     {
         private readonly IRawMaterialService _materialService;

@@ -46,25 +46,18 @@ namespace IndustryX.Application.Services.Implementations
 
         public async Task<(bool Success, string? ErrorMessage)> CreateAsync(Product product)
         {
-            var nameExists = await _productRepository.AnyAsync(p => p.Name.ToLower() == product.Name.ToLower());
-            if (nameExists)
+            if (await _productRepository.AnyAsync(p => p.Name.ToLower() == product.Name.ToLower()))
                 return (false, "A product with the same name already exists.");
 
-            var barcodeExists = await _productRepository.AnyAsync(p => p.Barcode == product.Barcode);
-            if (barcodeExists)
+            if (await _productRepository.AnyAsync(p => p.Barcode == product.Barcode))
                 return (false, "A product with the same barcode already exists.");
 
-            var includedReceipts = product.ProductReceipts
-                .Where(r => r.Include)
-                .Select(r => new ProductReceipt
-                {
-                    RawMaterialId = r.RawMaterialId,
-                    Quantity = r.Quantity
-                })
+            var validReceipts = product.ProductReceipts
+                .Where(r => r.Quantity > 0)
                 .ToList();
 
-            product.ProductReceipts = includedReceipts;
-            product.MaterialPrice = await CalculateMaterialPriceAsync(includedReceipts);
+            product.ProductReceipts = validReceipts;
+            product.MaterialPrice = await CalculateMaterialPriceAsync(validReceipts);
 
             await _productRepository.AddAsync(product);
             await _productRepository.SaveAsync();

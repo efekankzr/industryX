@@ -51,6 +51,28 @@
             <span class="nav_name">Production</span>
         </a>
 
+        <!-- Product Transfer -->
+        <p class="nav_section">Product Transfer</p>
+        <a asp-controller="ProductTransfer" asp-action="Index" class="nav_link">
+            <i class="fa-solid fa-truck-moving nav_icon"></i>
+            <span class="nav_name">Transfer List</span>
+        </a>
+        <a asp-controller="ProductTransfer" asp-action="ScanTransfer" class="nav_link">
+            <i class="fa-solid fa-barcode nav_icon"></i>
+            <span class="nav_name">Scan Transfer</span>
+        </a>
+        <a asp-controller="ProductTransfer" asp-action="Report" class="nav_link">
+            <i class="fa-solid fa-clipboard-list nav_icon"></i>
+            <span class="nav_name">Transfer Report</span>
+        </a>
+
+        <!-- Users -->
+        <p class="nav_section">Users</p>
+        <a asp-controller="User" asp-action="Index" class="nav_link">
+            <i class="fa-solid fa-users nav_icon"></i>
+            <span class="nav_name">User Management</span>
+        </a>
+
         <!-- Settings -->
         <p class="nav_section">Settings</p>
         <a asp-controller="GeneralSettings" asp-action="ListLabor" class="nav_link">

@@ -1,11 +1,13 @@
 ﻿using IndustryX.Application.Interfaces;
 using IndustryX.Application.Services.Interfaces;
 using IndustryX.Domain.Entities;
-using IndustryX.WebUI.Models;
+using IndustryX.WebUI.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IndustryX.WebUI.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ProductController : BaseController
     {
         private readonly IProductService _productService;
@@ -27,29 +29,36 @@ namespace IndustryX.WebUI.Controllers
 
         public async Task<IActionResult> Create()
         {
-            var vm = new ProductFormViewModel
+            var rawMaterials = await _rawMaterialService.GetAllAsync();
+            var model = new ProductCreateViewModel
             {
-                Product = new Product(),
-                RawMaterials = (await _rawMaterialService.GetAllAsync()).ToList()
+                RawMaterials = rawMaterials.Select(rm => new RawMaterialInputViewModel
+                {
+                    RawMaterialId = rm.Id,
+                    RawMaterialName = rm.Name
+                }).ToList()
             };
-            return View(vm);
+
+            return View(model);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(ProductFormViewModel vm)
+        public async Task<IActionResult> Create(ProductCreateViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                vm.RawMaterials = (await _rawMaterialService.GetAllAsync()).ToList();
-                return View(vm);
+                await LoadRawMaterialsIntoModel(model);
+                return View(model);
             }
 
-            var (success, error) = await _productService.CreateAsync(vm.Product);
+            var product = MapToProductEntity(model);
+
+            var (success, error) = await _productService.CreateAsync(product);
             if (!success)
             {
                 ShowAlert("Error", error!, "danger");
-                vm.RawMaterials = (await _rawMaterialService.GetAllAsync()).ToList();
-                return View(vm);
+                await LoadRawMaterialsIntoModel(model);
+                return View(model);
             }
 
             ShowAlert("Product Created", "Product successfully created.", "success");
@@ -65,36 +74,47 @@ namespace IndustryX.WebUI.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            foreach (var receipt in product.ProductReceipts)
+            var allMaterials = await _rawMaterialService.GetAllAsync();
+            var viewModel = new ProductEditViewModel
             {
-                receipt.Product = null;
-                receipt.RawMaterial?.ProductReceipts?.Clear();
-            }
-
-            var vm = new ProductFormViewModel
-            {
-                Product = product,
-                RawMaterials = (await _rawMaterialService.GetAllAsync()).ToList()
+                Id = product.Id,
+                Name = product.Name,
+                Barcode = product.Barcode,
+                PiecesInBox = product.PiecesInBox,
+                MaterialPrice = product.MaterialPrice,
+                RawMaterials = allMaterials.Select(rm =>
+                {
+                    var receipt = product.ProductReceipts.FirstOrDefault(r => r.RawMaterialId == rm.Id);
+                    return new RawMaterialInputViewModel
+                    {
+                        RawMaterialId = rm.Id,
+                        RawMaterialName = rm.Name,
+                        Include = receipt != null,
+                        Quantity = receipt?.Quantity
+                    };
+                }).ToList()
             };
 
-            return View(vm);
+            return View(viewModel);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(ProductFormViewModel vm)
+        public async Task<IActionResult> Edit(ProductEditViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                vm.RawMaterials = (await _rawMaterialService.GetAllAsync()).ToList();
-                return View(vm);
+                await LoadRawMaterialsIntoModel(model);
+                return View(model);
             }
 
-            var (success, error) = await _productService.UpdateAsync(vm.Product);
+            var product = MapToProductEntity(model);
+
+            var (success, error) = await _productService.UpdateAsync(product);
             if (!success)
             {
                 ShowAlert("Error", error!, "danger");
-                vm.RawMaterials = (await _rawMaterialService.GetAllAsync()).ToList();
-                return View(vm);
+                await LoadRawMaterialsIntoModel(model);
+                return View(model);
             }
 
             ShowAlert("Updated", "Product successfully updated.", "success");
@@ -114,6 +134,45 @@ namespace IndustryX.WebUI.Controllers
             await _productService.DeleteAsync(id);
             ShowAlert("Deleted", "Product deleted successfully.", "warning");
             return RedirectToAction(nameof(Index));
+        }
+
+        // ---------------------------------------
+        // Helpers
+        // ---------------------------------------
+
+        private async Task LoadRawMaterialsIntoModel(ProductBaseViewModel model)
+        {
+            var rawMaterials = await _rawMaterialService.GetAllAsync();
+            model.RawMaterials = rawMaterials.Select(rm =>
+            {
+                var existing = model.RawMaterials.FirstOrDefault(x => x.RawMaterialId == rm.Id);
+                return new RawMaterialInputViewModel
+                {
+                    RawMaterialId = rm.Id,
+                    RawMaterialName = rm.Name,
+                    Include = existing?.Include ?? false,
+                    Quantity = existing?.Quantity
+                };
+            }).ToList();
+        }
+
+        private Product MapToProductEntity(ProductBaseViewModel model)
+        {
+            return new Product
+            {
+                Id = (model is ProductEditViewModel edit) ? edit.Id : 0,
+                Name = model.Name,
+                Barcode = model.Barcode,
+                PiecesInBox = model.PiecesInBox,
+                ProductReceipts = model.RawMaterials
+                    .Where(r => r.Include && r.Quantity.HasValue)
+                    .Select(r => new ProductReceipt
+                    {
+                        RawMaterialId = r.RawMaterialId,
+                        Quantity = r.Quantity!.Value,
+                        Include = true
+                    }).ToList()
+            };
         }
     }
 }

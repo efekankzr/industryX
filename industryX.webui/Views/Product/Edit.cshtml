@@ -1,4 +1,4 @@
-﻿@model IndustryX.WebUI.Models.ProductFormViewModel
+﻿@model IndustryX.WebUI.ViewModels.ProductEditViewModel
 
 @{
     ViewData["Title"] = "Edit Product";
@@ -10,37 +10,37 @@
     </h2>
     <hr />
 
-    <form asp-action="Edit" method="post" enctype="multipart/form-data">
-        <input type="hidden" asp-for="Product.Id" />
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="Id" />
 
         <div class="row">
             <div class="col-md-6 border-end">
                 <div class="mb-3">
-                    <label asp-for="Product.Barcode" class="form-label">Barcode</label>
+                    <label asp-for="Barcode" class="form-label">Barcode</label>
                     <div class="input-group">
-                        <input asp-for="Product.Barcode" class="form-control" id="Barcode" />
+                        <input asp-for="Barcode" class="form-control" id="Barcode" />
                         <button type="button" class="btn btn-info" onclick="generateProductBarcode()">
                             <i class="fas fa-random me-1"></i> Generate
                         </button>
                     </div>
-                    <span asp-validation-for="Product.Barcode" class="text-danger small"></span>
+                    <span asp-validation-for="Barcode" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="Product.Name" class="form-label">Name</label>
-                    <input asp-for="Product.Name" class="form-control" />
-                    <span asp-validation-for="Product.Name" class="text-danger small"></span>
+                    <label asp-for="Name" class="form-label">Name</label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="Product.PiecesInBox" class="form-label">Pieces In Box</label>
-                    <input asp-for="Product.PiecesInBox" class="form-control" />
-                    <span asp-validation-for="Product.PiecesInBox" class="text-danger small"></span>
+                    <label asp-for="PiecesInBox" class="form-label">Pieces In Box</label>
+                    <input asp-for="PiecesInBox" class="form-control" />
+                    <span asp-validation-for="PiecesInBox" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Material Price</label>
-                    <input type="text" class="form-control" value="@Model.Product.MaterialPrice.ToString("F5")" readonly />
+                    <input type="text" class="form-control" value="@Model.MaterialPrice.ToString("F5")" readonly />
                 </div>
             </div>
 
@@ -57,23 +57,23 @@
                     <tbody>
                         @for (int i = 0; i < Model.RawMaterials.Count; i++)
                         {
-                            var rm = Model.RawMaterials[i];
-                            var receipt = Model.Product.ProductReceipts.FirstOrDefault(r => r.RawMaterialId == rm.Id);
-                            bool isIncluded = receipt != null;
-                            string quantity = isIncluded ? receipt.Quantity.ToString("F5") : "";
-
                             <tr>
                                 <td class="text-center">
-                                    <input type="checkbox" name="Product.ProductReceipts[@i].Include" value="true" @(isIncluded ? "checked" : "") />
-                                    <input type="hidden" name="Product.ProductReceipts[@i].RawMaterialId" value="@rm.Id" />
+                                    <input type="checkbox"
+                                           name="RawMaterials[@i].Include"
+                                           value="true"
+                                    @(Model.RawMaterials[i].Include ? "checked" : "") />
+                                    <input type="hidden"
+                                           name="RawMaterials[@i].RawMaterialId"
+                                           value="@Model.RawMaterials[i].RawMaterialId" />
                                 </td>
-                                <td>@rm.Name</td>
+                                <td>@Model.RawMaterials[i].RawMaterialName</td>
                                 <td>
                                     <input type="text"
-                                           name="Product.ProductReceipts[@i].Quantity"
+                                           name="RawMaterials[@i].Quantity"
                                            class="form-control form-control-sm"
-                                           value="@quantity"
-                                    @(isIncluded ? "" : "disabled") />
+                                           value="@(Model.RawMaterials[i].Quantity?.ToString("F5") ?? "")"
+                                    @(Model.RawMaterials[i].Include ? "" : "disabled") />
                                 </td>
                             </tr>
                         }

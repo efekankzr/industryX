@@ -26,6 +26,7 @@
         <table class="table table-bordered table-hover text-center" id="Table">
             <thead class="table-dark">
                 <tr>
+                    <th>Barcode</th>
                     <th>Name</th>
                     <th>Unit Price</th>
                     <th style="width: 120px;">Actions</th>
@@ -37,6 +38,7 @@
                     foreach (var rm in Model)
                     {
                         <tr>
+                            <td>@rm.Barcode</td>
                             <td>@rm.Name</td>
                             <td>@rm.Price.ToString("C", System.Globalization.CultureInfo.CurrentCulture)</td>
                             <td>

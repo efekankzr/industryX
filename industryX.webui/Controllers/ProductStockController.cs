@@ -1,8 +1,10 @@
 ﻿using IndustryX.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IndustryX.WebUI.Controllers
 {
+    [Authorize(Roles = "Admin,ProductionManager")]
     public class ProductStockController : BaseController
     {
         private readonly IProductStockService _productStockService;
@@ -19,6 +21,7 @@ namespace IndustryX.WebUI.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> SetCriticalStock(int id, int critical)
         {
             if (critical < 0)

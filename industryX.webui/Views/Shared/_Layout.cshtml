@@ -3,7 +3,9 @@
 
 @{
     var user = SignInManager.IsSignedIn(User) ? await UserManager.GetUserAsync(User) : null;
-    var isAdmin = user != null && await UserManager.IsInRoleAsync(user, "Admin");
+    var roles = user != null ? await UserManager.GetRolesAsync(user) : new List<string>();
+    bool isAdminPanelUser = roles.Any(r =>
+        r == "Admin" || r == "WarehouseManager" || r == "Driver" || r == "SalesManager" || r == "ProductionManager");
 }
 
 <!DOCTYPE html>
@@ -17,13 +19,13 @@
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/datatables.net-bs5/css/dataTables.bootstrap5.css" />
-
     <link rel="stylesheet" href="~/css/site.css" />
     <link rel="stylesheet" href="~/css/navbar.css" />
 </head>
 <body>
-    @if (isAdmin)
+    @if (isAdminPanelUser)
     {
+        <!-- Mobile Toggle Button -->
         <button class="btn btn-dark rounded-circle d-md-none position-fixed"
                 id="mobileMenuBtn"
                 type="button"
@@ -34,6 +36,7 @@
         </button>
 
         <div class="d-flex">
+            <!-- Mobile Sidebar -->
             <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="mobileSidebar">
                 <div class="offcanvas-header bg-dark text-white">
                     <h5 class="offcanvas-title">Admin Menu</h5>
@@ -46,10 +49,12 @@
                 </div>
             </div>
 
+            <!-- Desktop Sidebar -->
             <div class="d-none d-md-block">
                 @await Html.PartialAsync("_AdminNavbar", user, new ViewDataDictionary(ViewData) { { "IsMobile", false } })
             </div>
 
+            <!-- Main Content -->
             <div class="main-content flex-grow-1 p-4">
                 <main role="main">
                     @RenderBody()
@@ -60,24 +65,28 @@
     }
     else
     {
+        <!-- Sales Panel -->
         @await Html.PartialAsync("_SalesNavbar", user)
+
         <div class="container mt-3">
             <main role="main">
                 @RenderBody()
             </main>
             @await Html.PartialAsync("_AlertPartial")
         </div>
-    }    
+    }
 
+    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.2/xlsx.full.min.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.19.2/package/xlsx.full.min.js"></script>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/datatables.net/js/jquery.dataTables.js"></script>
     <script src="~/lib/datatables.net-bs5/js/dataTables.bootstrap5.js"></script>
+
     <script src="~/js/barcodeGenerator.js" asp-append-version="true"></script>
     <script src="~/js/barcodePdf.js" asp-append-version="true"></script>
     <script src="~/js/exportExcel.js" asp-append-version="true"></script>
