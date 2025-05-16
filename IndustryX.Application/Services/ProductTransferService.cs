@@ -50,6 +50,19 @@ namespace IndustryX.Application.Services
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
+        public async Task<ProductTransfer?> GetByBarcodeAsync(string barcode)
+        {
+            return await _transferRepository
+                .GetQueryable()
+                .Include(t => t.Product)
+                .Include(t => t.SourceWarehouse)
+                .Include(t => t.DestinationWarehouse)
+                .Include(t => t.InitiatedByUser)
+                .Include(t => t.DeliveredByUser)
+                .Include(t => t.ReceivedByUser)
+                .FirstOrDefaultAsync(t => t.TransferBarcode == barcode);
+        }
+
         public async Task<IEnumerable<ProductTransfer>> GetFilteredAsync(
             int? sourceWarehouseId,
             int? destinationWarehouseId,
@@ -85,12 +98,7 @@ namespace IndustryX.Application.Services
             return await query.OrderByDescending(x => x.CreatedAt).ToListAsync();
         }
 
-        public async Task<(bool Success, string? Error)> CreateAsync(
-            int sourceWarehouseId,
-            int destinationWarehouseId,
-            int productId,
-            int quantityBox,
-            string initiatedByUserId)
+        public async Task<(bool Success, string? Error)> CreateAsync(int sourceWarehouseId, int destinationWarehouseId, int productId, int quantityBox, string initiatedByUserId)
         {
             var product = await _productRepository.GetByIdAsync(productId);
             if (product == null)
@@ -99,7 +107,9 @@ namespace IndustryX.Application.Services
             var sourceStock = await _stockRepository.GetQueryable()
                 .FirstOrDefaultAsync(s => s.ProductId == productId && s.WarehouseId == sourceWarehouseId);
 
-            if (sourceStock == null || sourceStock.Stock < quantityBox * product.PiecesInBox)
+            int quantityPieces = quantityBox * product.PiecesInBox;
+
+            if (sourceStock == null || sourceStock.Stock < quantityPieces)
                 return (false, "Not enough stock in source warehouse.");
 
             var barcode = $"TR-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
@@ -116,17 +126,15 @@ namespace IndustryX.Application.Services
                 Status = TransferStatus.Created
             };
 
-            // Depodan stoğu düş
-            sourceStock.Stock -= quantityBox * product.PiecesInBox;
+            sourceStock.Stock -= quantityPieces;
             _stockRepository.Update(sourceStock);
 
-            // Zimmet kaydı oluştur
             var deficit = new ProductTransferDeficit
             {
                 ProductId = productId,
                 ProductTransfer = transfer,
                 UserId = initiatedByUserId,
-                DeficitQuantity = quantityBox * product.PiecesInBox
+                DeficitQuantity = quantityPieces
             };
 
             await _transferRepository.AddAsync(transfer);
@@ -138,70 +146,49 @@ namespace IndustryX.Application.Services
             return (true, null);
         }
 
-        public async Task<ProductTransfer?> GetByBarcodeAsync(string barcode)
-        {
-            return await _transferRepository
-                .GetQueryable()
-                .Include(t => t.Product)
-                .Include(t => t.SourceWarehouse)
-                .Include(t => t.DestinationWarehouse)
-                .Include(t => t.InitiatedByUser)
-                .Include(t => t.DeliveredByUser)
-                .Include(t => t.ReceivedByUser)
-                .FirstOrDefaultAsync(t => t.TransferBarcode == barcode);
-        }
-
         public async Task<(bool Success, string? Error)> AcceptTransferAsync(string barcode, int deliveredBoxCount, string deliveredByUserId)
         {
-            var transfer = await _transferRepository
-                .GetQueryable()
+            var transfer = await _transferRepository.GetQueryable()
                 .Include(t => t.Product)
-                .Include(t => t.InitiatedByUser)
-                .Include(t => t.DestinationWarehouse)
-                .Include(t => t.SourceWarehouse)
                 .FirstOrDefaultAsync(t => t.TransferBarcode == barcode);
 
             if (transfer == null)
                 return (false, "Transfer not found.");
 
             if (transfer.Status != TransferStatus.Created)
-                return (false, "Transfer is already in progress or completed.");
+                return (false, "Transfer already in progress or completed.");
 
-            if (deliveredBoxCount <= 0 || deliveredBoxCount > transfer.TransferQuantityBox)
-                return (false, "Invalid box quantity.");
+            var product = transfer.Product;
+            int deliveredPieces = deliveredBoxCount * product.PiecesInBox;
+            int totalPieces = transfer.TransferQuantityBox * product.PiecesInBox;
+            int remainingPieces = totalPieces - deliveredPieces;
 
-            var deliveredPieces = deliveredBoxCount * transfer.Product.PiecesInBox;
-            var totalPieces = transfer.TransferQuantityBox * transfer.Product.PiecesInBox;
-            var deficitPieces = totalPieces - deliveredPieces;
-
-            var existingDeficit = await _deficitRepository.GetQueryable()
+            var creatorDeficit = await _deficitRepository.GetQueryable()
                 .FirstOrDefaultAsync(d => d.ProductTransferId == transfer.Id && d.UserId == transfer.InitiatedByUserId);
 
-            if (existingDeficit == null)
-                return (false, "Original user deficit record not found.");
+            if (creatorDeficit == null)
+                return (false, "Original deficit not found.");
 
-            // Zimmeti yeni kullanıcıya devret
-            var newDeficit = new ProductTransferDeficit
+            if (remainingPieces > 0)
+            {
+                creatorDeficit.DeficitQuantity = remainingPieces;
+                _deficitRepository.Update(creatorDeficit);
+            }
+            else
+            {
+                _deficitRepository.Delete(creatorDeficit);
+            }
+
+            var driverDeficit = new ProductTransferDeficit
             {
                 ProductTransferId = transfer.Id,
                 ProductId = transfer.ProductId,
                 UserId = deliveredByUserId,
                 DeficitQuantity = deliveredPieces
             };
-            await _deficitRepository.AddAsync(newDeficit);
 
-            // Kalan zimmeti eski kullanıcıda bırak
-            if (deficitPieces > 0)
-            {
-                existingDeficit.DeficitQuantity = deficitPieces;
-                _deficitRepository.Update(existingDeficit);
-            }
-            else
-            {
-                _deficitRepository.Delete(existingDeficit);
-            }
+            await _deficitRepository.AddAsync(driverDeficit);
 
-            // Transfer güncelle
             transfer.DeliveredByUserId = deliveredByUserId;
             transfer.PickedUpAt = DateTime.Now;
             transfer.Status = TransferStatus.InTransit;
@@ -215,79 +202,66 @@ namespace IndustryX.Application.Services
 
         public async Task<(bool Success, string? Error)> CompleteTransferAsync(string barcode, int receivedBoxCount, string receivedByUserId)
         {
-            var transfer = await _transferRepository
-                .GetQueryable()
+            var transfer = await _transferRepository.GetQueryable()
                 .Include(t => t.Product)
-                .Include(t => t.DestinationWarehouse)
                 .FirstOrDefaultAsync(t => t.TransferBarcode == barcode);
 
             if (transfer == null)
                 return (false, "Transfer not found.");
 
             if (transfer.Status != TransferStatus.InTransit)
-                return (false, "Transfer is not in transit or has already been completed.");
+                return (false, "Transfer not in transit.");
 
-            if (receivedBoxCount <= 0 || receivedBoxCount > transfer.TransferQuantityBox)
-                return (false, "Invalid received box quantity.");
+            var product = transfer.Product;
+            int receivedPieces = receivedBoxCount * product.PiecesInBox;
 
-            var receivedPieces = receivedBoxCount * transfer.Product.PiecesInBox;
-            var totalPieces = transfer.TransferQuantityBox * transfer.Product.PiecesInBox;
-            var deficitPieces = totalPieces - receivedPieces;
-
-            // Taşıyıcının zimmetini al
-            var carrierDeficit = await _deficitRepository.GetQueryable()
+            var driverDeficit = await _deficitRepository.GetQueryable()
                 .FirstOrDefaultAsync(d => d.ProductTransferId == transfer.Id && d.UserId == transfer.DeliveredByUserId);
 
-            if (carrierDeficit == null)
-                return (false, "Carrier deficit record not found.");
+            if (driverDeficit == null)
+                return (false, "Driver's deficit not found.");
 
-            // Teslim alan kişi için yeni zimmet oluştur
-            if (receivedPieces > 0)
+            var stock = await _stockRepository.GetQueryable()
+                .FirstOrDefaultAsync(s => s.ProductId == product.Id && s.WarehouseId == transfer.DestinationWarehouseId);
+
+            if (stock == null)
             {
-                // Depo stoğunu arttır
-                var stock = await _stockRepository.GetQueryable()
-                    .FirstOrDefaultAsync(s => s.ProductId == transfer.ProductId && s.WarehouseId == transfer.DestinationWarehouseId);
-
-                if (stock == null)
+                stock = new ProductStock
                 {
-                    stock = new ProductStock
-                    {
-                        ProductId = transfer.ProductId,
-                        WarehouseId = transfer.DestinationWarehouseId,
-                        Stock = 0,
-                        QruicalStock = 0,
-                        Price = transfer.Product.MaterialPrice
-                    };
-                    await _stockRepository.AddAsync(stock);
-                }
-
-                stock.Stock += receivedPieces;
-                _stockRepository.Update(stock);
+                    ProductId = product.Id,
+                    WarehouseId = transfer.DestinationWarehouseId,
+                    Stock = 0,
+                    QruicalStock = 0,
+                    Price = product.MaterialPrice
+                };
+                await _stockRepository.AddAsync(stock);
             }
 
-            // Kalan zimmet taşıyıcıda kalsın
-            if (deficitPieces > 0)
+            stock.Stock += receivedPieces;
+            _stockRepository.Update(stock);
+
+            int driverRemaining = driverDeficit.DeficitQuantity - receivedPieces;
+
+            if (driverRemaining > 0)
             {
-                carrierDeficit.DeficitQuantity = deficitPieces;
-                _deficitRepository.Update(carrierDeficit);
+                driverDeficit.DeficitQuantity = driverRemaining;
+                _deficitRepository.Update(driverDeficit);
             }
             else
             {
-                _deficitRepository.Delete(carrierDeficit);
+                _deficitRepository.Delete(driverDeficit);
             }
 
-            // Transferi tamamla
             transfer.ReceivedByUserId = receivedByUserId;
             transfer.DeliveredAt = DateTime.Now;
             transfer.Status = TransferStatus.Delivered;
 
             _transferRepository.Update(transfer);
-
             await _stockRepository.SaveAsync();
             await _deficitRepository.SaveAsync();
             await _transferRepository.SaveAsync();
 
             return (true, null);
-        }
+        }             
     }
 }

@@ -25,10 +25,6 @@ namespace IndustryX.WebUI.Controllers
             _warehouseService = warehouseService;
         }
 
-        // ============================
-        // REPORT (Admin)
-        // ============================
-
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Report()
         {
@@ -57,20 +53,12 @@ namespace IndustryX.WebUI.Controllers
             return View(model);
         }
 
-        // ============================
-        // LIST (WarehouseManager)
-        // ============================
-
         [Authorize(Roles = "WarehouseManager")]
         public async Task<IActionResult> Index()
         {
             var transfers = await _transferService.GetAllAsync();
             return View(transfers);
         }
-
-        // ============================
-        // CREATE (WarehouseManager)
-        // ============================
 
         [Authorize(Roles = "WarehouseManager")]
         public async Task<IActionResult> Create()
@@ -118,10 +106,6 @@ namespace IndustryX.WebUI.Controllers
             };
         }
 
-        // ============================
-        // BARCODE SCAN (Driver + Manager)
-        // ============================
-
         [Authorize(Roles = "WarehouseManager, Driver")]
         public IActionResult ScanTransfer() => View();
 
@@ -151,10 +135,6 @@ namespace IndustryX.WebUI.Controllers
             ShowAlert("Unauthorized", "No permission or invalid status.", "danger");
             return View();
         }
-
-        // ============================
-        // ACCEPT TRANSFER (Driver)
-        // ============================
 
         [Authorize(Roles = "Driver")]
         public async Task<IActionResult> AcceptTransfer(string? barcode)
@@ -201,10 +181,6 @@ namespace IndustryX.WebUI.Controllers
             ShowAlert("Success", "Transfer accepted.", "success");
             return RedirectToAction(nameof(Index));
         }
-
-        // ============================
-        // COMPLETE TRANSFER (WarehouseManager)
-        // ============================
 
         [Authorize(Roles = "WarehouseManager")]
         public async Task<IActionResult> CompleteTransfer(string? barcode)
