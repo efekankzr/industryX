@@ -63,6 +63,28 @@ namespace IndustryX.Application.Services
                 .FirstOrDefaultAsync(t => t.TransferBarcode == barcode);
         }
 
+        public async Task<(ProductTransfer? Transfer, List<ProductTransferDeficit> Deficits)> GetDetailAsync(int transferId)
+        {
+            var transfer = await _transferRepository.GetQueryable()
+                .Include(t => t.Product)
+                .Include(t => t.SourceWarehouse)
+                .Include(t => t.DestinationWarehouse)
+                .Include(t => t.InitiatedByUser)
+                .Include(t => t.DeliveredByUser)
+                .Include(t => t.ReceivedByUser)
+                .FirstOrDefaultAsync(t => t.Id == transferId);
+
+            if (transfer == null)
+                return (null, new List<ProductTransferDeficit>());
+
+            var deficits = await _deficitRepository.GetQueryable()
+                .Where(d => d.ProductTransferId == transferId)
+                .Include(d => d.User)
+                .ToListAsync();
+
+            return (transfer, deficits);
+        }
+
         public async Task<IEnumerable<ProductTransfer>> GetFilteredAsync(
             int? sourceWarehouseId,
             int? destinationWarehouseId,
@@ -96,6 +118,67 @@ namespace IndustryX.Application.Services
                 query = query.Where(x => x.CreatedAt <= endDate.Value.Date.AddDays(1).AddSeconds(-1));
 
             return await query.OrderByDescending(x => x.CreatedAt).ToListAsync();
+        }
+
+        public async Task<(bool Success, string? Error)> DirectTransferAsync(
+            int sourceWarehouseId,
+            int destinationWarehouseId,
+            int productId,
+            int quantityBox,
+            string performedByUserId)
+        {
+            var product = await _productRepository.GetByIdAsync(productId);
+            if (product == null)
+                return (false, "Product not found.");
+
+            int quantityPieces = quantityBox * product.PiecesInBox;
+
+            var sourceStock = await _stockRepository.GetQueryable()
+                .FirstOrDefaultAsync(s => s.ProductId == productId && s.WarehouseId == sourceWarehouseId);
+
+            if (sourceStock == null || sourceStock.Stock < quantityPieces)
+                return (false, "Not enough stock in source warehouse.");
+
+            var destStock = await _stockRepository.GetQueryable()
+                .FirstOrDefaultAsync(s => s.ProductId == productId && s.WarehouseId == destinationWarehouseId);
+
+            int destOldStock = destStock?.Stock ?? 0;
+            decimal destOldPrice = destStock?.Price ?? 0;
+            decimal sourceUnitPrice = sourceStock.Price;
+
+            decimal transferValue = quantityPieces * sourceUnitPrice;
+            decimal destStockValue = destOldStock * destOldPrice;
+            int totalNewStock = destOldStock + quantityPieces;
+
+            decimal newAveragePrice = totalNewStock > 0
+                ? (destStockValue + transferValue) / totalNewStock
+                : sourceUnitPrice;
+
+            if (destStock == null)
+            {
+                destStock = new ProductStock
+                {
+                    ProductId = productId,
+                    WarehouseId = destinationWarehouseId,
+                    Stock = quantityPieces,
+                    QruicalStock = 0,
+                    Price = newAveragePrice
+                };
+                await _stockRepository.AddAsync(destStock);
+            }
+            else
+            {
+                destStock.Stock += quantityPieces;
+                destStock.Price = newAveragePrice;
+                _stockRepository.Update(destStock);
+            }
+
+            sourceStock.Stock -= quantityPieces;
+            _stockRepository.Update(sourceStock);
+
+            await _stockRepository.SaveAsync();
+
+            return (true, null);
         }
 
         public async Task<(bool Success, string? Error)> CreateAsync(int sourceWarehouseId, int destinationWarehouseId, int productId, int quantityBox, string initiatedByUserId)
@@ -237,6 +320,15 @@ namespace IndustryX.Application.Services
                 await _stockRepository.AddAsync(stock);
             }
 
+            // Fiyat güncelleme mantığı
+            decimal existingValue = stock.Stock * stock.Price;
+            decimal transferValue = receivedPieces * product.MaterialPrice;
+            int newTotalStock = stock.Stock + receivedPieces;
+
+            stock.Price = newTotalStock > 0
+                ? (existingValue + transferValue) / newTotalStock
+                : stock.Price;
+
             stock.Stock += receivedPieces;
             _stockRepository.Update(stock);
 
@@ -262,6 +354,6 @@ namespace IndustryX.Application.Services
             await _transferRepository.SaveAsync();
 
             return (true, null);
-        }             
+        }
     }
 }

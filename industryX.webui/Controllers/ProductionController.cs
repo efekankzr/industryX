@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IndustryX.WebUI.Controllers
 {
-    [Authorize(Roles = "Admin,SalesManager")]
+    [Authorize(Roles = "Admin,ProductionManager")]
     public class ProductionController : BaseController
     {
         private readonly IProductionService _productionService;
@@ -19,14 +19,34 @@ namespace IndustryX.WebUI.Controllers
             _productService = productService;
         }
 
-        [HttpGet]
         public async Task<IActionResult> Index()
         {
+            var isAdmin = User.IsInRole("Admin");
+
             var productions = await _productionService.GetAllAsync();
+
+            if (!isAdmin)
+            {
+                productions = productions
+                    .Where(p => p.Status != ProductionStatus.Completed)
+                    .ToList();
+            }
+
             return View(productions);
         }
 
-        [HttpGet]
+        public async Task<IActionResult> Detail(int id)
+        {
+            var production = await _productionService.GetByIdAsync(id);
+            if (production == null)
+            {
+                ShowAlert("Error", "Production not found.", "danger");
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(production);
+        }
+
         public async Task<IActionResult> Create()
         {
             var model = new ProductionFormViewModel
@@ -109,19 +129,6 @@ namespace IndustryX.WebUI.Controllers
                 success ? "success" : "danger"
             );
             return RedirectToAction(nameof(Index));
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Detail(int id)
-        {
-            var production = await _productionService.GetByIdAsync(id);
-            if (production == null)
-            {
-                ShowAlert("Error", "Production not found.", "danger");
-                return RedirectToAction(nameof(Index));
-            }
-
-            return View(production);
-        }
+        }        
     }
 }

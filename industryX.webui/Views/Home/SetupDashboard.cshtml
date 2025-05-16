@@ -1,0 +1,137 @@
+﻿@model IndustryX.WebUI.ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "System Setup";
+}
+
+<div class="my-4 p-4 bg-light shadow-sm rounded">
+    <h2 class="text-primary text-center mb-4">
+        <i class="fas fa-tools"></i> System Setup Warnings
+    </h2>
+    <hr />
+
+    <div class="table-responsive">
+        <table class="table table-bordered text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>Check</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Warehouse Definition</td>
+                    <td>
+                        <span class="badge @(Model.HasWarehouse ? "bg-success" : "bg-danger")">
+                            @(Model.HasWarehouse ? "Exists" : "Missing")
+                        </span>
+                    </td>
+                    <td>
+                        @if (!Model.HasWarehouse)
+                        {
+                            <a asp-controller="Warehouse" asp-action="Create" class="btn btn-sm btn-outline-primary">
+                                Define Now
+                            </a>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td>Main Product Warehouse</td>
+                    <td>
+                        <span class="badge @(Model.HasMainProductWarehouse ? "bg-success" : "bg-danger")">
+                            @(Model.HasMainProductWarehouse ? "Exists" : "Missing")
+                        </span>
+                    </td>
+                    <td>
+                        @if (!Model.HasMainProductWarehouse)
+                        {
+                            <a asp-controller="Warehouse" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                                Define Now
+                            </a>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td>Main Raw Material Warehouse</td>
+                    <td>
+                        <span class="badge @(Model.HasMainRawMaterialWarehouse ? "bg-success" : "bg-danger")">
+                            @(Model.HasMainRawMaterialWarehouse ? "Exists" : "Missing")
+                        </span>
+                    </td>
+                    <td>
+                        @if (!Model.HasMainRawMaterialWarehouse)
+                        {
+                            <a asp-controller="Warehouse" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                                Define Now
+                            </a>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td>Main Sales Product Warehouse</td>
+                    <td>
+                        <span class="badge @(Model.HasMainSalesProductWarehouse ? "bg-success" : "bg-danger")">
+                            @(Model.HasMainSalesProductWarehouse ? "Exists" : "Missing")
+                        </span>
+                    </td>
+                    <td>
+                        @if (!Model.HasMainSalesProductWarehouse)
+                        {
+                            <a asp-controller="Warehouse" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                                Define Now
+                            </a>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td>Labor Cost</td>
+                    <td>
+                        <span class="badge @(Model.HasLaborCost ? "bg-success" : "bg-danger")">
+                            @(Model.HasLaborCost ? "Exists" : "Missing")
+                        </span>
+                    </td>
+                    <td>
+                        @if (!Model.HasLaborCost)
+                        {
+                            <a asp-controller="GeneralSettings" asp-action="ListLabor" class="btn btn-sm btn-outline-primary">
+                                Define Now
+                            </a>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td>Product Definition</td>
+                    <td>
+                        <span class="badge @(Model.HasProduct ? "bg-success" : "bg-danger")">
+                            @(Model.HasProduct ? "Exists" : "Missing")
+                        </span>
+                    </td>
+                    <td>
+                        @if (!Model.HasProduct)
+                        {
+                            <a asp-controller="Product" asp-action="Create" class="btn btn-sm btn-outline-primary">
+                                Define Now
+                            </a>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td>Raw Material Definition</td>
+                    <td>
+                        <span class="badge @(Model.HasRawMaterial ? "bg-success" : "bg-danger")">
+                            @(Model.HasRawMaterial ? "Exists" : "Missing")
+                        </span>
+                    </td>
+                    <td>
+                        @if (!Model.HasRawMaterial)
+                        {
+                            <a asp-controller="RawMaterial" asp-action="Create" class="btn btn-sm btn-outline-primary">
+                                Define Now
+                            </a>
+                        }
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

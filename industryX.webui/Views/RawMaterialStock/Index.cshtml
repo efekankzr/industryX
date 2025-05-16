@@ -14,11 +14,15 @@
             <thead class="table-dark">
                 <tr>
                     <th>Raw Material</th>
+                    <th>Barcode</th>
                     <th>Warehouse</th>
                     <th>Current Stock</th>
-                    <th>Critical Stock</th>
-                    <th>Adjust Stock</th>
-                    <th>Set Critical</th>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <th>Critical Stock</th>
+                        <th>Adjust Stock</th>
+                        <th>Set Critical</th>
+                    }                    
                 </tr>
             </thead>
             <tbody>
@@ -28,30 +32,48 @@
                     {
                         <tr>
                             <td>@item.RawMaterial.Name</td>
+                            <td>@item.RawMaterial.Barcode</td>
                             <td>@item.Warehouse.Name</td>
                             <td>@item.Stock.ToString("F5", System.Globalization.CultureInfo.CurrentCulture)</td>
-                            <td class="text-danger">@item.QruicalStock.ToString("F5", System.Globalization.CultureInfo.CurrentCulture)</td>
-                            <td>
-                                <form asp-action="AdjustStock" method="post" class="d-flex justify-content-center gap-1">
-                                    <input type="hidden" name="id" value="@item.Id" />
-                                    <input type="number" name="amount" class="form-control form-control-sm w-50" placeholder="Amount" step="0.01" />
-                                    <button type="submit" name="operation" value="increase" class="btn btn-success btn-sm">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                    <button type="submit" name="operation" value="decrease" class="btn btn-danger btn-sm">
-                                        <i class="fas fa-minus"></i>
-                                    </button>
-                                </form>
-                            </td>
-                            <td>
-                                <form asp-action="SetCriticalStock" method="post" class="d-flex justify-content-center gap-1">
-                                    <input type="hidden" name="id" value="@item.Id" />
-                                    <input type="number" name="critical" class="form-control form-control-sm w-75" placeholder="Critical" step="0.01" />
-                                    <button type="submit" class="btn btn-warning btn-sm">
-                                        <i class="fas fa-save"></i>
-                                    </button>
-                                </form>
-                            </td>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <td class="text-danger">@item.QruicalStock.ToString("F5", System.Globalization.CultureInfo.CurrentCulture)</td>                                
+                            }
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <td>
+                                    <form asp-action="AdjustStock" method="post" class="d-flex justify-content-center gap-1">
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <input type="number" name="amount" class="form-control form-control-sm w-50" placeholder="Amount" step="0.01" />
+                                        <button type="submit" name="operation" value="increase" class="btn btn-success btn-sm">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                        <button type="submit" name="operation" value="decrease" class="btn btn-danger btn-sm">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            }
+                            else
+                            {
+                                <td><span class="text-muted">N/A</span></td>
+                            }
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <td>
+                                    <form asp-action="SetCriticalStock" method="post" class="d-flex justify-content-center gap-1">
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <input type="number" name="critical" class="form-control form-control-sm w-75" placeholder="Critical" step="0.01" />
+                                        <button type="submit" class="btn btn-warning btn-sm">
+                                            <i class="fas fa-save"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            }
+                            else
+                            {
+                                <td><span class="text-muted">N/A</span></td>
+                            }
                         </tr>
                     }
                 }

@@ -25,23 +25,44 @@ namespace IndustryX.WebUI.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid)
+                return View(model);
 
-            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, true);
+            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
 
             if (result.Succeeded)
             {
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                {
+                    ShowAlert("Login Failed", "User not found.", "danger");
+                    return View(model);
+                }
+
+                var roles = await _userManager.GetRolesAsync(user);
+
+                if (roles.Contains("Admin"))
+                    return RedirectToAction("AdminDashboard", "Home");
+
+                if (roles.Any(r => r == "Driver" || r == "WarehouseManager" || r == "ProductionManager"))
+                    return RedirectToAction("PersonelDashboard", "Home");
+
                 ShowAlert("Welcome!", "You have successfully logged in.", "success");
                 return RedirectToAction("Index", "Home");
             }
 
             if (result.IsLockedOut)
+            {
                 ShowAlert("Account Locked", "Your account is temporarily locked due to failed attempts.", "danger");
+            }
             else
+            {
                 ShowAlert("Login Failed", "Invalid email or password.", "danger");
+            }
 
             return View(model);
         }
+
 
         [HttpGet]
         public IActionResult Register() => View();

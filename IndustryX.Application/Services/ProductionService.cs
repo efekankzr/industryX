@@ -200,10 +200,7 @@ namespace IndustryX.Application.Services
         public async Task<bool> FinishProductionAsync(int id)
         {
             var production = await GetByIdAsync(id);
-            if (production == null || production.Status != ProductionStatus.InProgress)
-                return false;
-
-            if (!production.StartTime.HasValue)
+            if (production == null || production.Status != ProductionStatus.InProgress || !production.StartTime.HasValue)
                 return false;
 
             using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
@@ -213,44 +210,36 @@ namespace IndustryX.Application.Services
                 production.EndTime = DateTime.Now;
                 production.Status = ProductionStatus.Completed;
 
-                var totalTime = (decimal)(production.EndTime.Value - production.StartTime.Value).TotalMinutes;
-                var totalPause = production.Pauses.Sum(p => p.Duration);
-                production.BreakOutTime = totalPause;
-                production.TotalTime = totalTime - totalPause;
+                // TotalTime ve BreakOutTime milisaniye cinsinden
+                long totalTimeMillis = (long)(production.EndTime.Value - production.StartTime.Value).TotalMilliseconds;
+                long breakMillis = (long)production.Pauses.Sum(p => p.Duration * 60000); // her pause süresi dakika, milise çevir
+
+                production.BreakOutTime = breakMillis;
+                production.TotalTime = totalTimeMillis;
 
                 var product = production.Product;
                 var stock = await GetMainProductStock(production.ProductId);
 
                 if (product != null && stock != null)
                 {
-                    // 1. Üretim adedi
-                    int producedUnits = production.TotalProducedPieces;
+                    int producedUnits = production.BoxQuantity * product.PiecesInBox;
 
-                    // 2. Hammadde maliyeti
-                    decimal totalRawMaterialCost = product.MaterialPrice * producedUnits;
+                    decimal totalRawMaterialCost = producedUnits * product.MaterialPrice;
 
-                    // 3. İşçilik maliyeti
                     var laborCost = (await _laborCostRepository.GetQueryable()
                         .Where(l => l.EffectiveDate <= production.CreatedAt)
                         .OrderByDescending(l => l.EffectiveDate)
                         .FirstOrDefaultAsync())?.HourlyWage ?? 0;
 
-                    decimal totalLaborCost = (laborCost / 3600000m) * production.TotalTime;
+                    decimal totalLaborCost = ((totalTimeMillis - breakMillis) * production.WorkerCount * laborCost) / 3600000m;
 
-                    // 4. Yeni maliyet ve miktar
-                    decimal totalNewCost = totalRawMaterialCost + totalLaborCost;
-                    int newQty = producedUnits;
+                    decimal totalCost = totalRawMaterialCost + totalLaborCost;
 
-                    // 5. Eski toplam değer
                     decimal existingValue = stock.Stock * stock.Price;
+                    int totalQty = stock.Stock + producedUnits;
 
-                    // 6. Yeni fiyat hesapla
-                    decimal combinedValue = existingValue + totalNewCost;
-                    int totalQuantity = stock.Stock + newQty;
-                    stock.Price = totalQuantity > 0 ? combinedValue / totalQuantity : stock.Price;
-
-                    // 7. Stok miktarını artır
-                    stock.Stock += newQty;
+                    stock.Price = totalQty > 0 ? (existingValue + totalCost) / totalQty : stock.Price;
+                    stock.Stock += producedUnits;
 
                     _productStockRepository.Update(stock);
                     await _productStockRepository.SaveAsync();
@@ -265,17 +254,6 @@ namespace IndustryX.Application.Services
             catch
             {
                 return false;
-            }
-        }
-
-        private async Task IncreaseProductStock(Production production)
-        {
-            var productStock = await GetMainProductStock(production.ProductId);
-            if (productStock != null)
-            {
-                productStock.Stock += production.TotalProducedPieces;
-                _productStockRepository.Update(productStock);
-                await _productStockRepository.SaveAsync();
             }
         }
 

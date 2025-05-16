@@ -71,16 +71,11 @@
                     <th>Initiated</th>
                     <th>Picked Up</th>
                     <th>Delivered</th>
+                    <th style="width: 100px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                @if (!Model.Transfers.Any())
-                {
-                    <tr>
-                        <td colspan="9" class="text-muted">No transfers found.</td>
-                    </tr>
-                }
-                else
+                @if (Model.Transfers.Any())
                 {
                     foreach (var t in Model.Transfers)
                     {
@@ -94,6 +89,11 @@
                             <td>@t.CreatedAt.ToString("g")</td>
                             <td>@(t.PickedUpAt?.ToString("g") ?? "-")</td>
                             <td>@(t.DeliveredAt?.ToString("g") ?? "-")</td>
+                            <td>
+                                <a asp-action="Detail" asp-route-id="@t.Id" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
                         </tr>
                     }
                 }

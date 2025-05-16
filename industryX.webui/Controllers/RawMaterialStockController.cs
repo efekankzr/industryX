@@ -1,4 +1,6 @@
 ﻿using IndustryX.Application.Interfaces;
+using IndustryX.Application.Services.Interfaces;
+using IndustryX.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,17 +10,45 @@ namespace IndustryX.WebUI.Controllers
     public class RawMaterialStockController : BaseController
     {
         private readonly IRawMaterialStockService _stockService;
+        private readonly IUserService _userService;
 
-        public RawMaterialStockController(IRawMaterialStockService stockService)
+        public RawMaterialStockController(IRawMaterialStockService stockService, IUserService userService)
         {
             _stockService = stockService;
+            _userService = userService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var stocks = await _stockService.GetAllWithIncludesAsync();
-            return View(stocks);
+            var allStocks = await _stockService.GetAllWithIncludesAsync();
+
+            if (User.IsInRole("Admin"))
+            {
+                return View(allStocks);
+            }
+
+            if (User.IsInRole("ProductionManager"))
+            {
+                var userId = User.Identity?.Name ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                var user = await _userService.GetByIdAsync(userId);
+                if (user == null || user.WarehouseId == null)
+                {
+                    ShowAlert("Error", "No warehouse is assigned to your user profile.", "danger");
+                    return View(Enumerable.Empty<RawMaterialStock>());
+                }
+
+                var userWarehouseId = user.WarehouseId.Value;
+                var filtered = allStocks
+                    .Where(s => s.WarehouseId == userWarehouseId)
+                    .ToList();
+
+                return View(filtered);
+            }
+
+            return Forbid();
         }
+
 
         [HttpPost]
         [Authorize(Roles = "Admin")]

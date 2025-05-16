@@ -59,12 +59,12 @@
                     <span>@(Model.EndTime?.ToString("g") ?? "-")</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
-                    <strong>Total Time (min):</strong>
-                    <span>@Model.TotalTime</span>
+                    <strong>Total Time (millis):</strong>
+                    <span>@Model.TotalTime.ToString("F0")</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
-                    <strong>Break Time (min):</strong>
-                    <span>@Model.BreakOutTime</span>
+                    <strong>Break Time (millis):</strong>
+                    <span>@Model.BreakOutTime.ToString("F0")</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between">
                     <strong>Created At:</strong>

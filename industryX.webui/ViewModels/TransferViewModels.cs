@@ -68,4 +68,10 @@ namespace IndustryX.WebUI.ViewModels
         public string SourceWarehouse { get; set; } = string.Empty;
         public string DestinationWarehouse { get; set; } = string.Empty;
     }
+
+    public class ProductTransferDetailViewModel
+    {
+        public ProductTransfer Transfer { get; set; }
+        public List<ProductTransferDeficit> Deficits { get; set; } = new();
+    }
 }

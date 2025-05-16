@@ -27,7 +27,6 @@
                     <th>To</th>
                     <th>Status</th>
                     <th>Initiated</th>
-                    <th style="width: 150px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -53,34 +52,7 @@
                                     break;
                             }
                         </td>
-                        <td>@t.CreatedAt.ToString("g")</td>
-                        <td>
-                            <a asp-action="Detail" asp-route-id="@t.Id" class="btn btn-sm btn-primary me-1">
-                                <i class="fas fa-eye"></i>
-                            </a>
-
-                            @* Örnek butonlar - tamamlandıkça aktif edilecek *@
-                            @* 
-                            @if (t.Status == TransferStatus.Created)
-                            {
-                                <form asp-action="Pickup" method="post" class="d-inline">
-                                    <input type="hidden" name="id" value="@t.Id" />
-                                    <button class="btn btn-sm btn-warning">
-                                        <i class="fas fa-truck"></i>
-                                    </button>
-                                </form>
-                            }
-                            else if (t.Status == TransferStatus.InTransit)
-                            {
-                                <form asp-action="Deliver" method="post" class="d-inline">
-                                    <input type="hidden" name="id" value="@t.Id" />
-                                    <button class="btn btn-sm btn-success">
-                                        <i class="fas fa-box"></i>
-                                    </button>
-                                </form>
-                            }
-                            *@
-                        </td>
+                        <td>@t.CreatedAt.ToString("g")</td>                        
                     </tr>
                 }
             </tbody>

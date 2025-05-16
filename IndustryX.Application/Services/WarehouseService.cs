@@ -1,6 +1,7 @@
 ﻿using IndustryX.Application.Interfaces;
 using IndustryX.Domain.Entities;
 using IndustryX.Domain.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace IndustryX.Application.Services
 {
@@ -24,6 +25,17 @@ namespace IndustryX.Application.Services
             _rawMaterialStockRepository = rawMaterialStockRepository;
             _productRepository = productRepository;
             _rawMaterialRepository = rawMaterialRepository;
+        }
+
+        public async Task<(bool HasMainProductWarehouse, bool HasMainRawMaterialWarehouse, bool HasMainSalesProductWarehouse)> CheckMainWarehousesAsync()
+        {
+            var query = _warehouseRepository.GetQueryable();
+
+            bool hasMainProduct = await query.AnyAsync(w => w.IsMainForProduct);
+            bool hasMainRaw = await query.AnyAsync(w => w.IsMainForRawMaterial);
+            bool hasMainSales = await query.AnyAsync(w => w.IsMainForSalesProduct);
+
+            return (hasMainProduct, hasMainRaw, hasMainSales);
         }
 
         public async Task<IEnumerable<Warehouse>> GetAllAsync() => await _warehouseRepository.GetAllAsync();

@@ -1,12 +1,16 @@
 @model IEnumerable<IndustryX.Domain.Entities.Production>
+@using IndustryX.Domain.Entities
 
 @{
     ViewData["Title"] = "Production Management";
+    bool isAdmin = User.IsInRole("Admin");
+    bool isManager = User.IsInRole("ProductionManager");
 }
 
 <div class="my-4 p-4 bg-light shadow-sm rounded">
     <h2 class="text-primary text-center mb-3">
-        <i class="fas fa-industry"></i> Production Management
+        <i class="fas fa-industry"></i>
+        @(isAdmin ? "Production Overview" : isManager ? "Production List" : "Production")
     </h2>
     <hr />
 
@@ -27,12 +31,17 @@
                     <th>Status</th>
                     <th>Start</th>
                     <th>End</th>
-                    <th style="width: 160px;">Actions</th>
+                    <th style="width: 180px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var p in Model)
                 {
+                    if (isManager && p.Status == ProductionStatus.Completed)
+                    {
+                        continue;
+                    }
+
                     <tr>
                         <td>@p.Product.Name</td>
                         <td>@p.BoxQuantity</td>
@@ -58,42 +67,49 @@
                         <td>@(p.EndTime?.ToString("g") ?? "-")</td>
                         <td>
                             <div class="d-flex flex-wrap justify-content-center gap-1">
-                                <a asp-action="Detail" asp-route-id="@p.Id" class="btn btn-sm btn-info">
-                                    <i class="fas fa-eye"></i>
-                                </a>
 
-                                @if (p.Status == ProductionStatus.Planned)
+                                @if (isAdmin)
                                 {
-                                    <form asp-action="Start" method="post" class="d-inline">
-                                        <input type="hidden" name="id" value="@p.Id" />
-                                        <button type="submit" class="btn btn-sm btn-success">
-                                            <i class="fas fa-play"></i>
-                                        </button>
-                                    </form>
+                                    <a asp-action="Detail" asp-route-id="@p.Id" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
                                 }
-                                else if (p.Status == ProductionStatus.InProgress)
+
+                                @if (isManager)
                                 {
-                                    <form asp-action="Pause" method="post" class="d-inline">
-                                        <input type="hidden" name="id" value="@p.Id" />
-                                        <button type="submit" class="btn btn-sm btn-warning">
-                                            <i class="fas fa-pause"></i>
-                                        </button>
-                                    </form>
-                                    <form asp-action="Finish" method="post" class="d-inline">
-                                        <input type="hidden" name="id" value="@p.Id" />
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="fas fa-stop"></i>
-                                        </button>
-                                    </form>
-                                }
-                                else if (p.Status == ProductionStatus.Paused)
-                                {
-                                    <form asp-action="Resume" method="post" class="d-inline">
-                                        <input type="hidden" name="id" value="@p.Id" />
-                                        <button type="submit" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-play"></i>
-                                        </button>
-                                    </form>
+                                    if (p.Status == ProductionStatus.Planned)
+                                    {
+                                        <form asp-action="Start" method="post" class="d-inline">
+                                            <input type="hidden" name="id" value="@p.Id" />
+                                            <button type="submit" class="btn btn-sm btn-success" title="Start">
+                                                <i class="fas fa-play"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (p.Status == ProductionStatus.InProgress)
+                                    {
+                                        <form asp-action="Pause" method="post" class="d-inline">
+                                            <input type="hidden" name="id" value="@p.Id" />
+                                            <button type="submit" class="btn btn-sm btn-warning" title="Pause">
+                                                <i class="fas fa-pause"></i>
+                                            </button>
+                                        </form>
+                                        <form asp-action="Finish" method="post" class="d-inline">
+                                            <input type="hidden" name="id" value="@p.Id" />
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Finish">
+                                                <i class="fas fa-stop"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (p.Status == ProductionStatus.Paused)
+                                    {
+                                        <form asp-action="Resume" method="post" class="d-inline">
+                                            <input type="hidden" name="id" value="@p.Id" />
+                                            <button type="submit" class="btn btn-sm btn-primary" title="Resume">
+                                                <i class="fas fa-play"></i>
+                                            </button>
+                                        </form>
+                                    }
                                 }
                             </div>
                         </td>

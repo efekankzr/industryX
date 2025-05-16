@@ -16,8 +16,11 @@
                     <th>Product</th>
                     <th>Warehouse</th>
                     <th>Current Stock</th>
-                    <th>Critical Stock</th>
-                    <th>Set Critical</th>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <th>Critical Stock</th>
+                        <th>Set Critical</th>
+                    }
                 </tr>
             </thead>
             <tbody>
@@ -29,16 +32,19 @@
                             <td>@item.Product.Name</td>
                             <td>@item.Warehouse.Name</td>
                             <td>@item.Stock</td>
-                            <td class="text-danger">@item.QruicalStock</td>
-                            <td>
-                                <form asp-action="SetCriticalStock" method="post" class="d-flex justify-content-center gap-1">
-                                    <input type="hidden" name="id" value="@item.Id" />
-                                    <input type="number" name="critical" class="form-control form-control-sm w-75" placeholder="Critical" step="0.01" />
-                                    <button type="submit" class="btn btn-warning btn-sm">
-                                        <i class="fas fa-save"></i>
-                                    </button>
-                                </form>
-                            </td>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <td class="text-danger">@item.QruicalStock</td>
+                                <td>
+                                    <form asp-action="SetCriticalStock" method="post" class="d-flex justify-content-center gap-1">
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <input type="number" name="critical" class="form-control form-control-sm w-75" placeholder="Critical" step="0.01" />
+                                        <button type="submit" class="btn btn-warning btn-sm">
+                                            <i class="fas fa-save"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            }
                         </tr>
                     }
                 }

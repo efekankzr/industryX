@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IndustryX.WebUI.Controllers
 {
-    [Authorize(Roles = "Admin,ProductionManager")]
+    [Authorize(Roles = "Admin,WarehouseManager")]
     public class ProductStockController : BaseController
     {
         private readonly IProductStockService _productStockService;

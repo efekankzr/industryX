@@ -1,17 +1,15 @@
 ﻿@model IndustryX.WebUI.ViewModels.ProductTransferFormViewModel
 @{
-    ViewData["Title"] = "Create Product Transfer";
+    ViewData["Title"] = "Direct Transfer";
 }
 
 <div class="my-4 p-4 bg-light shadow-sm rounded">
     <h2 class="text-primary text-center mb-3">
-        <i class="fas fa-exchange-alt"></i> Create Product Transfer
+        <i class="fas fa-exchange-alt"></i> Direct Product Transfer
     </h2>
     <hr />
 
-    <form asp-action="Create" method="post" onsubmit="return validateTransferForm();">
-        <input type="hidden" asp-for="SourceWarehouseId" />
-
+    <form asp-action="DirectTransfer" method="post" onsubmit="return validateDirectTransfer();">
         <div class="row mb-3">
             <div class="col-md-6">
                 <label asp-for="ProductId" class="form-label">Product</label>
@@ -31,10 +29,12 @@
 
         <div class="row mb-3">
             <div class="col-md-6">
-                <label class="form-label">Source Warehouse</label>
-                <input class="form-control" type="text"
-                       value="@Model.Warehouses.FirstOrDefault(w => w.Id == Model.SourceWarehouseId)?.Name ?? " Your Warehouse""
-                       disabled />
+                <label asp-for="SourceWarehouseId" class="form-label">Source Warehouse</label>
+                <select asp-for="SourceWarehouseId" class="form-select" required
+                        asp-items="@(new SelectList(Model.Warehouses, "Id", "Name"))">
+                    <option value="">-- Select Source --</option>
+                </select>
+                <span asp-validation-for="SourceWarehouseId" class="text-danger small"></span>
             </div>
 
             <div class="col-md-6">
@@ -52,7 +52,7 @@
                 <i class="fas fa-arrow-left me-1"></i> Cancel
             </a>
             <button type="submit" class="btn btn-success">
-                <i class="fas fa-paper-plane me-1"></i> Initiate Transfer
+                <i class="fas fa-check-circle me-1"></i> Confirm Transfer
             </button>
         </div>
     </form>
@@ -62,10 +62,10 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        function validateTransferForm() {
-            const source = document.querySelector('input[name="SourceWarehouseId"]').value;
-            const destination = document.getElementById("DestinationWarehouseId").value;
-            if (source === destination && source !== "") {
+        function validateDirectTransfer() {
+            const source = document.getElementById("SourceWarehouseId").value;
+            const dest = document.getElementById("DestinationWarehouseId").value;
+            if (source === dest && source !== "") {
                 alert("Source and destination warehouses cannot be the same.");
                 return false;
             }
