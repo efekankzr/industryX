@@ -1,4 +1,5 @@
-﻿using IndustryX.Application.Interfaces;
+﻿using System.Security.Claims;
+using IndustryX.Application.Interfaces;
 using IndustryX.Application.Services.Interfaces;
 using IndustryX.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -29,9 +30,10 @@ namespace IndustryX.WebUI.Controllers
 
             if (User.IsInRole("ProductionManager"))
             {
-                var userId = User.Identity?.Name ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
                 var user = await _userService.GetByIdAsync(userId);
+                Console.WriteLine($"UserId: {userId}, WarehouseId: {user?.WarehouseId}");
                 if (user == null || user.WarehouseId == null)
                 {
                     ShowAlert("Error", "No warehouse is assigned to your user profile.", "danger");

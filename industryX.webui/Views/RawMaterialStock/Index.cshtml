@@ -22,7 +22,7 @@
                         <th>Critical Stock</th>
                         <th>Adjust Stock</th>
                         <th>Set Critical</th>
-                    }                    
+                    }
                 </tr>
             </thead>
             <tbody>
@@ -37,10 +37,7 @@
                             <td>@item.Stock.ToString("F5", System.Globalization.CultureInfo.CurrentCulture)</td>
                             @if (User.IsInRole("Admin"))
                             {
-                                <td class="text-danger">@item.QruicalStock.ToString("F5", System.Globalization.CultureInfo.CurrentCulture)</td>                                
-                            }
-                            @if (User.IsInRole("Admin"))
-                            {
+                                <td class="text-danger">@item.QruicalStock.ToString("F5", System.Globalization.CultureInfo.CurrentCulture)</td>
                                 <td>
                                     <form asp-action="AdjustStock" method="post" class="d-flex justify-content-center gap-1">
                                         <input type="hidden" name="id" value="@item.Id" />
@@ -53,13 +50,6 @@
                                         </button>
                                     </form>
                                 </td>
-                            }
-                            else
-                            {
-                                <td><span class="text-muted">N/A</span></td>
-                            }
-                            @if (User.IsInRole("Admin"))
-                            {
                                 <td>
                                     <form asp-action="SetCriticalStock" method="post" class="d-flex justify-content-center gap-1">
                                         <input type="hidden" name="id" value="@item.Id" />
@@ -69,10 +59,6 @@
                                         </button>
                                     </form>
                                 </td>
-                            }
-                            else
-                            {
-                                <td><span class="text-muted">N/A</span></td>
                             }
                         </tr>
                     }

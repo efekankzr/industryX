@@ -11,6 +11,8 @@ namespace IndustryX.Application.Interfaces
         Task<(bool Success, string? Error)> DirectTransferAsync(int sourceWarehouseId, int destinationWarehouseId, int productId, int quantityBox, string performedByUserId);
         Task<(bool Success, string? Error)> CreateAsync(int sourceWarehouseId, int destinationWarehouseId, int productId, int quantityBox, string initiatedByUserId);
         Task<ProductTransfer?> GetByBarcodeAsync(string barcode);
+        Task<List<ProductTransfer>> GetAllCreatedTransfersAsync();
+        Task<List<ProductTransfer>> GetAllInTransitTransfersAsync();
         Task<(bool Success, string? Error)> AcceptTransferAsync(string barcode, int deliveredBoxCount, string deliveredByUserId);
         Task<(bool Success, string? Error)> CompleteTransferAsync(string barcode, int receivedBoxCount, string receivedByUserId);
     }

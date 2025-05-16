@@ -1,4 +1,8 @@
-﻿using IndustryX.Application.Interfaces;
+﻿using System.Security.Claims;
+using IndustryX.Application.Interfaces;
+using IndustryX.Application.Services;
+using IndustryX.Application.Services.Interfaces;
+using IndustryX.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,16 +12,45 @@ namespace IndustryX.WebUI.Controllers
     public class ProductStockController : BaseController
     {
         private readonly IProductStockService _productStockService;
+        private readonly IUserService _userService;
 
-        public ProductStockController(IProductStockService productStockService)
+        public ProductStockController(IProductStockService productStockService,
+            IUserService userService)
         {
             _productStockService = productStockService;
+            _userService = userService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var stocks = await _productStockService.GetAllWithIncludesAsync();
-            return View(stocks);
+            var allStocks = await _productStockService.GetAllWithIncludesAsync();
+
+            if (User.IsInRole("Admin"))
+            {
+                return View(allStocks);
+            }
+
+            if (User.IsInRole("WarehouseManager"))
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                var user = await _userService.GetByIdAsync(userId);
+                Console.WriteLine($"UserId: {userId}, WarehouseId: {user?.WarehouseId}");
+                if (user == null || user.WarehouseId == null)
+                {
+                    ShowAlert("Error", "No warehouse is assigned to your user profile.", "danger");
+                    return View(Enumerable.Empty<ProductStock>());
+                }
+
+                var userWarehouseId = user.WarehouseId.Value;
+                var filtered = allStocks
+                    .Where(s => s.WarehouseId == userWarehouseId)
+                    .ToList();
+
+                return View(filtered);
+            }
+
+            return Forbid();
         }
 
         [HttpPost]

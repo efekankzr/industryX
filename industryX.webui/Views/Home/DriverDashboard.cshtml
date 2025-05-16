@@ -1,0 +1,66 @@
+﻿@model List<IndustryX.Domain.Entities.ProductTransfer>
+
+@{
+    ViewData["Title"] = "Driver Dashboard";
+    var transferCount = Model.Count;
+}
+
+<div class="container-fluid px-4">
+    <h2 class="mb-4">
+        <i class="fas fa-truck me-2"></i>Driver Dashboard
+    </h2>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-success shadow-sm">
+                <div class="card-body text-success">
+                    <h5 class="card-title">
+                        <i class="fas fa-box me-2"></i>Transfers Ready
+                    </h5>
+                    <p class="fs-4 fw-bold mb-0">@transferCount</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info shadow-sm">
+            <i class="fas fa-info-circle me-2"></i>
+            There are no products currently ready for transfer.
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="card-header bg-light fw-semibold">
+                <i class="fas fa-list me-2"></i>Products Ready for Transfer
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity (Boxes)</th>
+                            <th>Source Warehouse</th>
+                            <th>Destination Warehouse</th>
+                            <th>Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Product.Name</td>
+                                <td>@item.TransferQuantityBox</td>
+                                <td>@item.SourceWarehouse.Name</td>
+                                <td>@item.DestinationWarehouse.Name</td>
+                                <td>@item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

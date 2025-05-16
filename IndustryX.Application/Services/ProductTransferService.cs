@@ -63,6 +63,29 @@ namespace IndustryX.Application.Services
                 .FirstOrDefaultAsync(t => t.TransferBarcode == barcode);
         }
 
+        public async Task<List<ProductTransfer>> GetAllCreatedTransfersAsync()
+        {
+            return await _transferRepository
+                .GetQueryable()
+                .Include(t => t.Product)
+                .Include(t => t.SourceWarehouse)
+                .Include(t => t.DestinationWarehouse)
+                .Where(t => t.Status == TransferStatus.Created)
+                .ToListAsync();
+        }
+
+        public async Task<List<ProductTransfer>> GetAllInTransitTransfersAsync()
+        {
+            return await _transferRepository
+                .GetQueryable()
+                .Include(t => t.Product)
+                .Include(t => t.SourceWarehouse)
+                .Include(t => t.DestinationWarehouse)
+                .Where(t => t.Status == TransferStatus.InTransit)
+                .ToListAsync();
+        }
+
+
         public async Task<(ProductTransfer? Transfer, List<ProductTransferDeficit> Deficits)> GetDetailAsync(int transferId)
         {
             var transfer = await _transferRepository.GetQueryable()

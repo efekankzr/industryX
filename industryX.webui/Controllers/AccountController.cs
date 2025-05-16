@@ -41,11 +41,8 @@ namespace IndustryX.WebUI.Controllers
 
                 var roles = await _userManager.GetRolesAsync(user);
 
-                if (roles.Contains("Admin"))
-                    return RedirectToAction("AdminDashboard", "Home");
-
-                if (roles.Any(r => r == "Driver" || r == "WarehouseManager" || r == "ProductionManager"))
-                    return RedirectToAction("PersonelDashboard", "Home");
+                if (roles.Any(r => r == "Driver" || r == "WarehouseManager" || r == "ProductionManager" || r=="Admin"))
+                    return RedirectToAction("RedirectDasboards", "Home");
 
                 ShowAlert("Welcome!", "You have successfully logged in.", "success");
                 return RedirectToAction("Index", "Home");
