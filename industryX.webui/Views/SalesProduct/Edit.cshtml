@@ -1,0 +1,136 @@
+﻿@model IndustryX.WebUI.ViewModels.SalesProductEditViewModel
+
+@{
+    ViewData["Title"] = "Edit Sales Product";
+}
+
+<div class="my-4 p-4 bg-light shadow-sm rounded">
+    <h2 class="text-primary text-center mb-3">
+        <i class="fas fa-pen"></i> Edit Sales Product
+    </h2>
+    <hr />
+
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="row">
+            <!-- Left Column -->
+            <div class="col-md-6 border-end">
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label">Name</label>
+                    <input asp-for="Name" class="form-control" id="SalesProductName" oninput="generateUrlFromName('SalesProductName', 'Url')" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Url" class="form-label">URL</label>
+                    <input asp-for="Url" class="form-control" id="Url" />
+                    <span asp-validation-for="Url" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="SalePrice" class="form-label">Sale Price</label>
+                    <input asp-for="SalePrice" class="form-control" type="number" step="0.01" />
+                    <span asp-validation-for="SalePrice" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label">Description</label>
+                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ProductId" class="form-label">Linked Product</label>
+                    <select asp-for="ProductId" class="form-select" asp-items="@(new SelectList(Model.Products, "Id", "DisplayName"))">
+                        <option value="">-- Select Product --</option>
+                    </select>
+                    <span asp-validation-for="ProductId" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="NewImages" class="form-label">Upload New Images</label>
+                    <input asp-for="NewImages" class="form-control" type="file" multiple />
+                    <span asp-validation-for="NewImages" class="text-danger small"></span>
+                </div>
+
+                @if (Model.ExistingImages.Any())
+                {
+                    <div class="mb-3">
+                        <label class="form-label">Existing Images</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var image in Model.ExistingImages)
+                            {
+                                <div class="position-relative">
+                                    <img src="@image.ImagePath" class="img-thumbnail"
+                                         style="width: 100px; height: 100px; object-fit: cover;" />
+                                    <form asp-action="DeleteImage"
+                                          asp-route-imageId="@image.Id"
+                                          method="post"
+                                          onsubmit="return confirm('Are you sure you want to delete this image?');"
+                                          class="position-absolute top-0 end-0">
+                                        <button type="submit" class="btn btn-sm btn-danger p-1">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label">Categories</label>
+                    <div class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+                        @foreach (var category in Model.Categories)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="SelectedCategoryIds"
+                                       value="@category.Id"
+                                       id="cat_@category.Id"
+                                @(category.IsSelected ? "checked" : "") />
+                                <label class="form-check-label" for="cat_@category.Id">
+                                    @category.Name
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Tags</label>
+                    <div class="form-check">
+                        <input asp-for="IsActive" class="form-check-input" />
+                        <label asp-for="IsActive" class="form-check-label">Active</label>
+                    </div>
+                    <div class="form-check">
+                        <input asp-for="IsPopular" class="form-check-input" />
+                        <label asp-for="IsPopular" class="form-check-label">Popular</label>
+                    </div>
+                    <div class="form-check">
+                        <input asp-for="IsBestSeller" class="form-check-input" />
+                        <label asp-for="IsBestSeller" class="form-check-label">Best Seller</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 d-flex justify-content-end gap-2">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-1"></i> Update
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="~/js/urlGenerator.js"></script>
+}

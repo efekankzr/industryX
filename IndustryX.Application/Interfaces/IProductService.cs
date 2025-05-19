@@ -1,6 +1,6 @@
 ﻿using IndustryX.Domain.Entities;
 
-namespace IndustryX.Application.Services.Interfaces
+namespace IndustryX.Application.Interfaces
 {
     public interface IProductService
     {

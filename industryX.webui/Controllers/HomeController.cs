@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-using IndustryX.Application.Interfaces;
-using IndustryX.Application.Services.Interfaces;
+﻿using IndustryX.Application.Interfaces;
 using IndustryX.WebUI.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

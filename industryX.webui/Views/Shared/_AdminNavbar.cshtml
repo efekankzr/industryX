@@ -101,6 +101,19 @@
             }
         }
 
+        <!-- SALES -->
+        @if (User.IsInRole("Admin") || User.IsInRole("SalesManager"))
+        {
+            <p class="nav_section">Sales</p>
+            <a asp-controller="SalesProduct" asp-action="Index" class="nav_link">
+                <i class="fa-solid fa-store nav_icon"></i>
+                <span class="nav_name">Sales Products</span>
+            </a>
+            <a asp-controller="Category" asp-action="List" class="nav_link">
+                <i class="fa-solid fa-tags nav_icon"></i>
+                <span class="nav_name">Categories</span>
+            </a>
+        }
 
         <!-- USERS -->
         @if (User.IsInRole("Admin"))

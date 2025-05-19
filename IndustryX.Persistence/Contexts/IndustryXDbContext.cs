@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using IndustryX.Domain.Entities;
+﻿using IndustryX.Domain.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace IndustryX.Persistence.Contexts
@@ -20,12 +20,30 @@ namespace IndustryX.Persistence.Contexts
         public DbSet<ProductionPause> ProductionPauses { get; set; }
         public DbSet<ProductTransfer> ProductTransfers { get; set; }
         public DbSet<ProductTransferDeficit> ProductTransferDeficits { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<SalesProduct> SalesProducts { get; set; }
+        public DbSet<SalesProductCategory> SalesProductCategories { get; set; }
+        public DbSet<SalesProductImage> SalesProductImages { get; set; }
+
 
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<SalesProductCategory>()
+                .HasKey(spc => new { spc.SalesProductId, spc.CategoryId });
+
+            modelBuilder.Entity<SalesProductCategory>()
+                .HasOne(spc => spc.SalesProduct)
+                .WithMany(sp => sp.SalesProductCategories)
+                .HasForeignKey(spc => spc.SalesProductId);
+
+            modelBuilder.Entity<SalesProductCategory>()
+                .HasOne(spc => spc.Category)
+                .WithMany(c => c.SalesProductCategories)
+                .HasForeignKey(spc => spc.CategoryId);
         }
     }
 }
