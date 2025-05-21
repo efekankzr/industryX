@@ -6,80 +6,76 @@
 <div class="@(isMobile ? "d-flex flex-column h-100" : "l-navbar d-flex flex-column")">
     <div class="nav_list flex-grow-1 overflow-auto p-3">
 
-        <!-- DASHBOARD -->
-        @if (User.IsInRole("Admin") || User.IsInRole("ProductionManager") || User.IsInRole("Driver") || User.IsInRole("WarehouseManager"))
+        @* DASHBOARD *@
+        @if (User.IsInRole("Admin") || User.IsInRole("ProductionManager") || User.IsInRole("Driver") || User.IsInRole("WarehouseManager") || User.IsInRole("SalesManager"))
         {
             <p class="nav_section">Dashboard</p>
-            <a asp-controller="Home" asp-action="AdminDashboard" class="nav_link">
+            <a asp-controller="Home" asp-action="RedirectDasboards" class="nav_link">
                 <i class="fa-solid fa-chart-line nav_icon"></i>
                 <span class="nav_name">Dashboard</span>
             </a>
         }
 
-        <!-- PRODUCT & RAW MATERIAL & WAREHOUSE-->
+        @* PRODUCT MANAGEMENT *@
         @if (User.IsInRole("Admin"))
         {
-            <p class="nav_section">Product</p>
+            <p class="nav_section">Inventory</p>
             <a asp-controller="Product" asp-action="Index" class="nav_link">
                 <i class="fa-solid fa-box nav_icon"></i>
-                <span class="nav_name">Product</span>
+                <span class="nav_name">Products</span>
             </a>
-            <p class="nav_section">Raw Material</p>
             <a asp-controller="RawMaterial" asp-action="Index" class="nav_link">
                 <i class="fa-solid fa-cubes nav_icon"></i>
-                <span class="nav_name">Raw Material</span>
+                <span class="nav_name">Raw Materials</span>
             </a>
-            <p class="nav_section">Warehouse</p>
             <a asp-controller="Warehouse" asp-action="Index" class="nav_link">
                 <i class="fa-solid fa-warehouse nav_icon"></i>
-                <span class="nav_name">Warehouse</span>
+                <span class="nav_name">Warehouses</span>
             </a>
         }
 
-        <!-- STOCK OPERATIONS -->
+        @* STOCK MANAGEMENT *@
         @if (User.IsInRole("Admin") || User.IsInRole("ProductionManager"))
         {
             <p class="nav_section">Stock</p>
             <a asp-controller="RawMaterialStock" asp-action="Index" class="nav_link">
                 <i class="fa-solid fa-layer-group nav_icon"></i>
                 <span class="nav_name">Raw Material Stock</span>
-            </a>            
+            </a>
         }
         @if (User.IsInRole("Admin") || User.IsInRole("WarehouseManager"))
-        {            
+        {
             <a asp-controller="ProductStock" asp-action="Index" class="nav_link">
                 <i class="fa-solid fa-boxes-stacked nav_icon"></i>
                 <span class="nav_name">Product Stock</span>
             </a>
         }
 
-        <!-- PRODUCTION -->
+        @* PRODUCTION *@
         @if (User.IsInRole("Admin") || User.IsInRole("ProductionManager"))
         {
             <p class="nav_section">Production</p>
             <a asp-controller="Production" asp-action="Index" class="nav_link">
                 <i class="fa-solid fa-industry nav_icon"></i>
-                <span class="nav_name">Production Overview</span>
+                <span class="nav_name">Overview</span>
             </a>
             <a asp-controller="Production" asp-action="Create" class="nav_link">
-                <i class="fa-solid fa-industry nav_icon"></i>
+                <i class="fa-solid fa-circle-plus nav_icon"></i>
                 <span class="nav_name">Create Production</span>
             </a>
         }
 
-        <!-- PRODUCT TRANSFER -->
+        @* PRODUCT TRANSFER *@
         @if (User.IsInRole("WarehouseManager") || User.IsInRole("Driver") || User.IsInRole("Admin"))
         {
-            <p class="nav_section">Product Transfer</p>
-
+            <p class="nav_section">Transfers</p>
             @if (User.IsInRole("WarehouseManager"))
             {
                 <a asp-controller="ProductTransfer" asp-action="Index" class="nav_link">
-                    <i class="fa-solid fa-truck-moving nav_icon"></i>
+                    <i class="fa-solid fa-truck nav_icon"></i>
                     <span class="nav_name">Transfer List</span>
                 </a>
             }
-
             @if (User.IsInRole("Driver") || User.IsInRole("WarehouseManager"))
             {
                 <a asp-controller="ProductTransfer" asp-action="ScanTransfer" class="nav_link">
@@ -87,7 +83,6 @@
                     <span class="nav_name">Scan Transfer</span>
                 </a>
             }
-
             @if (User.IsInRole("Admin"))
             {
                 <a asp-controller="ProductTransfer" asp-action="DirectTransfer" class="nav_link">
@@ -96,12 +91,12 @@
                 </a>
                 <a asp-controller="ProductTransfer" asp-action="Report" class="nav_link">
                     <i class="fa-solid fa-clipboard-list nav_icon"></i>
-                    <span class="nav_name">Transfer Report</span>
+                    <span class="nav_name">Reports</span>
                 </a>
             }
         }
 
-        <!-- SALES -->
+        @* SALES *@
         @if (User.IsInRole("Admin") || User.IsInRole("SalesManager"))
         {
             <p class="nav_section">Sales</p>
@@ -109,34 +104,48 @@
                 <i class="fa-solid fa-store nav_icon"></i>
                 <span class="nav_name">Sales Products</span>
             </a>
-            <a asp-controller="Category" asp-action="List" class="nav_link">
+            <a asp-controller="Category" asp-action="Index" class="nav_link">
                 <i class="fa-solid fa-tags nav_icon"></i>
                 <span class="nav_name">Categories</span>
             </a>
         }
 
-        <!-- USERS -->
-        @if (User.IsInRole("Admin"))
+        @* USERS *@
+        @if (User.IsInRole("Admin") || User.IsInRole("ProductionManager") || User.IsInRole("Driver") || User.IsInRole("WarehouseManager") || User.IsInRole("SalesManager"))
         {
             <p class="nav_section">Users</p>
             <a asp-controller="User" asp-action="Index" class="nav_link">
                 <i class="fa-solid fa-users nav_icon"></i>
-                <span class="nav_name">User Management</span>
+                <span class="nav_name">Personnel</span>
             </a>
+            @if (User.IsInRole("Admin"))
+            {                
+                <a asp-controller="User" asp-action="Create" class="nav_link">
+                    <i class="fa-solid fa-user-plus nav_icon"></i>
+                    <span class="nav_name">Add Personnel</span>
+                </a>
+            }
+            @if (User.IsInRole("Admin") || User.IsInRole("SalesManager"))
+            {
+                <a asp-controller="User" asp-action="CustomerList" class="nav_link">
+                    <i class="fa-solid fa-user-group nav_icon"></i>
+                    <span class="nav_name">Customers</span>
+                </a>                
+            }
         }
 
-        <!-- SETTINGS -->
+        @* SETTINGS *@
         @if (User.IsInRole("Admin"))
         {
             <p class="nav_section">Settings</p>
             <a asp-controller="GeneralSettings" asp-action="ListLabor" class="nav_link">
                 <i class="fa-solid fa-gear nav_icon"></i>
-                <span class="nav_name">Labor Cost</span>
+                <span class="nav_name">Labor Costs</span>
             </a>
         }
     </div>
 
-    <!-- FOOTER -->
+    @* FOOTER *@
     <div class="nav_footer border-top border-secondary-subtle pt-3 p-3">
         <div class="nav_link">
             <i class="fa-solid fa-user nav_icon"></i>

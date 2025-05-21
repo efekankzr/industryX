@@ -12,19 +12,25 @@ namespace IndustryX.Application.Services
         private readonly IRepository<RawMaterialStock> _rawMaterialStockRepository;
         private readonly IRepository<Product> _productRepository;
         private readonly IRepository<RawMaterial> _rawMaterialRepository;
+        private readonly IRepository<SalesProduct> _salesProductRepository;
+        private readonly IRepository<SalesProductStock> _salesProductStockRepository;
 
         public WarehouseService(
             IRepository<Warehouse> warehouseRepository,
             IRepository<ProductStock> productStockRepository,
             IRepository<RawMaterialStock> rawMaterialStockRepository,
             IRepository<Product> productRepository,
-            IRepository<RawMaterial> rawMaterialRepository)
+            IRepository<RawMaterial> rawMaterialRepository,
+            IRepository<SalesProduct> salesProductRepository,
+            IRepository<SalesProductStock> salesProductStockRepository)
         {
             _warehouseRepository = warehouseRepository;
             _productStockRepository = productStockRepository;
             _rawMaterialStockRepository = rawMaterialStockRepository;
             _productRepository = productRepository;
             _rawMaterialRepository = rawMaterialRepository;
+            _salesProductRepository = salesProductRepository;
+            _salesProductStockRepository = salesProductStockRepository;
         }
 
         public async Task<(bool HasMainProductWarehouse, bool HasMainRawMaterialWarehouse, bool HasMainSalesProductWarehouse)> CheckMainWarehousesAsync()
@@ -53,6 +59,7 @@ namespace IndustryX.Application.Services
 
             var products = await _productRepository.GetAllAsync();
             var rawMaterials = await _rawMaterialRepository.GetAllAsync();
+            var salesProducts = await _salesProductRepository.GetAllAsync();
 
             foreach (var product in products)
             {
@@ -77,6 +84,19 @@ namespace IndustryX.Application.Services
                 });
             }
 
+            foreach (var sp in salesProducts)
+            {
+                await _salesProductStockRepository.AddAsync(new SalesProductStock
+                {
+                    SalesProductId = sp.Id,
+                    WarehouseId = warehouse.Id,
+                    Stock = 0,
+                    CriticalStock = 0,
+                    Price = 0
+                });
+            }
+
+            await _salesProductStockRepository.SaveAsync();
             await _productStockRepository.SaveAsync();
             await _rawMaterialStockRepository.SaveAsync();
 

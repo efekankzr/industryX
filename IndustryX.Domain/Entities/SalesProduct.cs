@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace IndustryX.Domain.Entities
+﻿namespace IndustryX.Domain.Entities
 {
     public class SalesProduct
     {

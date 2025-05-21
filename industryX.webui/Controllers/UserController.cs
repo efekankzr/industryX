@@ -1,5 +1,4 @@
 ﻿using IndustryX.Application.Interfaces;
-using IndustryX.Application.Services.Interfaces;
 using IndustryX.Domain.Entities;
 using IndustryX.WebUI.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -30,18 +29,50 @@ namespace IndustryX.WebUI.Controllers
             var users = await _userService.GetAllAsync();
             var model = new List<UserListViewModel>();
 
+            var targetRoles = new[] { "WarehouseManager", "Driver", "ProductionManager", "SalesManager" };
+
             foreach (var user in users)
             {
                 var roles = await _userService.GetRolesAsync(user.Id);
-                model.Add(new UserListViewModel
+
+                if (roles.Any(r => targetRoles.Contains(r)))
                 {
-                    Id = user.Id,
-                    Fullname = $"{user.Firstname} {user.Surname}",
-                    Email = user.Email,
-                    PhoneNumber = user.PhoneNumber ?? "-",
-                    Role = roles.FirstOrDefault() ?? "-",
-                    WarehouseName = user.Warehouse?.Name ?? "-"
-                });
+                    model.Add(new UserListViewModel
+                    {
+                        Id = user.Id,
+                        Fullname = $"{user.Firstname} {user.Surname}",
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber ?? "-",
+                        Role = roles.FirstOrDefault() ?? "-",
+                        WarehouseName = user.Warehouse?.Name ?? "-"
+                    });
+                }
+            }
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> CustomerList()
+        {
+            var users = await _userService.GetAllAsync();
+            var model = new List<UserListViewModel>();
+
+            foreach (var user in users)
+            {
+                var roles = await _userService.GetRolesAsync(user.Id);
+
+                if (roles.Contains("Customer"))
+                {
+                    model.Add(new UserListViewModel
+                    {
+                        Id = user.Id,
+                        Fullname = $"{user.Firstname} {user.Surname}",
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber ?? "-",
+                        Role = "Customer",
+                        WarehouseName = user.Warehouse?.Name ?? "-"
+                    });
+                }
             }
 
             return View(model);

@@ -1,0 +1,30 @@
+﻿@model ApplicationUser
+
+<div class="list-group shadow-sm border rounded mb-4">
+    <!-- Profile Header -->
+    <div class="list-group-item bg-light fw-bold text-dark">
+        <i class="fas fa-user-circle me-2"></i> @Model.Firstname @Model.Surname
+    </div>
+
+    <!-- My Orders -->
+    <div class="list-group-item text-uppercase small fw-semibold text-muted">
+        My Orders
+    </div>
+    <a asp-controller="Shop" asp-action="MyOrders" class="list-group-item list-group-item-action">
+        <i class="fas fa-box me-2"></i> Orders
+    </a>
+
+    <!-- Account -->
+    <div class="list-group-item text-uppercase small fw-semibold text-muted">
+        Account
+    </div>
+    <a asp-controller="Profile" asp-action="Index" class="list-group-item list-group-item-action">
+        <i class="fas fa-user me-2"></i> Profile
+    </a>
+    <a asp-controller="Profile" asp-action="Addresses" class="list-group-item list-group-item-action">
+        <i class="fas fa-map-marker-alt me-2"></i> Addresses
+    </a>
+    <a asp-controller="Profile" asp-action="ChangePassword" class="list-group-item list-group-item-action">
+        <i class="fas fa-lock me-2"></i> Change Password
+    </a>
+</div>

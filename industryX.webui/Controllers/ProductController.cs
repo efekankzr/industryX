@@ -29,6 +29,13 @@ namespace IndustryX.WebUI.Controllers
         public async Task<IActionResult> Create()
         {
             var rawMaterials = await _rawMaterialService.GetAllAsync();
+
+            if (!rawMaterials.Any())
+            {
+                ShowAlert("Warning", "You must add at least one raw material before creating a product.", "warning");
+                return RedirectToAction("Index", "RawMaterial");
+            }
+
             var model = new ProductCreateViewModel
             {
                 RawMaterials = rawMaterials.Select(rm => new RawMaterialInputViewModel
@@ -40,7 +47,7 @@ namespace IndustryX.WebUI.Controllers
 
             return View(model);
         }
-
+        
         [HttpPost]
         public async Task<IActionResult> Create(ProductCreateViewModel model)
         {

@@ -1,0 +1,60 @@
+﻿@model List<IndustryX.WebUI.ViewModels.CartItemViewModel>
+
+@{
+    ViewData["Title"] = "My Cart";
+    decimal grandTotal = Model.Sum(x => x.Total);
+}
+
+<div class="my-4 p-4 bg-light shadow-sm rounded">
+    <h2 class="text-primary mb-4"><i class="fas fa-shopping-cart me-2"></i> My Cart</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">Your cart is empty.</div>
+    }
+    else
+    {
+        <table class="table table-bordered table-hover align-middle text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Unit Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <img src="@item.ImageUrl" class="img-thumbnail" style="width: 60px; height: 60px;" />
+                        </td>
+                        <td>@item.ProductName</td>
+                        <td>@item.UnitPrice.ToString("C")</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.Total.ToString("C")</td>
+                        <td>
+                            <form asp-action="RemoveFromCart" asp-route-id="@item.SalesProductId" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash-alt"></i> Remove
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="d-flex justify-content-end mt-3">
+            <h4>Total: <span class="text-success">@grandTotal.ToString("C")</span></h4>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-3">
+            <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i> Continue Shopping</a>
+            <a asp-action="Checkout" class="btn btn-primary"><i class="fas fa-credit-card me-1"></i> Checkout</a>
+        </div>
+    }
+</div>

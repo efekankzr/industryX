@@ -50,26 +50,35 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @for (int i = 0; i < Model.RawMaterials.Count; i++)
+                        @if (Model.RawMaterials != null && Model.RawMaterials.Any())
+                        {
+                            for (int i = 0; i < Model.RawMaterials.Count; i++)
+                            {
+                                <tr>
+                                    <td class="text-center">
+                                        <input type="checkbox"
+                                               name="RawMaterials[@i].Include"
+                                               value="true"
+                                               class="form-check-input"
+                                               data-include-checkbox />
+                                        <input type="hidden"
+                                               name="RawMaterials[@i].RawMaterialId"
+                                               value="@Model.RawMaterials[i].RawMaterialId" />
+                                    </td>
+                                    <td>@Model.RawMaterials[i].RawMaterialName</td>
+                                    <td>
+                                        <input type="text"
+                                               name="RawMaterials[@i].Quantity"
+                                               class="form-control form-control-sm"
+                                               data-qty-input />
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
                         {
                             <tr>
-                                <td class="text-center">
-                                    <input type="checkbox"
-                                           name="RawMaterials[@i].Include"
-                                           value="true"
-                                           class="form-check-input"
-                                           data-include-checkbox />
-                                    <input type="hidden"
-                                           name="RawMaterials[@i].RawMaterialId"
-                                           value="@Model.RawMaterials[i].RawMaterialId" />
-                                </td>
-                                <td>@Model.RawMaterials[i].RawMaterialName</td>
-                                <td>
-                                    <input type="text"
-                                           name="RawMaterials[@i].Quantity"
-                                           class="form-control form-control-sm"
-                                           data-qty-input />
-                                </td>
+                                <td colspan="3" class="text-center text-muted">No raw materials available. Please add some first.</td>
                             </tr>
                         }
                     </tbody>
@@ -100,10 +109,8 @@
                 const row = checkbox.closest("tr");
                 const qtyInput = row.querySelector('[data-qty-input]');
 
-                // İlk yüklemede durumu ayarla
                 qtyInput.disabled = !checkbox.checked;
 
-                // Checkbox değiştiğinde input'u enable/disable yap
                 checkbox.addEventListener("change", function () {
                     qtyInput.disabled = !this.checked;
                     if (!this.checked) qtyInput.value = "";

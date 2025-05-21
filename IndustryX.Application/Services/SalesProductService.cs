@@ -8,10 +8,17 @@ namespace IndustryX.Application.Services
     public class SalesProductService : ISalesProductService
     {
         private readonly IRepository<SalesProduct> _salesProductRepository;
+        private readonly IRepository<Warehouse> _warehouseRepository;
+        private readonly IRepository<SalesProductStock> _salesProductStockRepository;
 
-        public SalesProductService(IRepository<SalesProduct> salesProductRepository)
+        public SalesProductService(
+            IRepository<SalesProduct> salesProductRepository, 
+            IRepository<SalesProductStock> salesProductStockRepository, 
+            IRepository<Warehouse> warehouseRepository)
         {
             _salesProductRepository = salesProductRepository;
+            _salesProductStockRepository = salesProductStockRepository;
+            _warehouseRepository = warehouseRepository;
         }
 
         public async Task<List<SalesProduct>> GetAllAsync()
@@ -24,6 +31,33 @@ namespace IndustryX.Application.Services
                     .ThenInclude(spc => spc.Category)
                 .ToListAsync();
         }
+
+        public async Task InitializeSalesProductStocksAsync(int salesProductId)
+        {
+            var warehouses = await _warehouseRepository.GetAllAsync();
+
+            foreach (var warehouse in warehouses)
+            {
+                bool alreadyExists = await _salesProductStockRepository.AnyAsync(
+                    s => s.SalesProductId == salesProductId && s.WarehouseId == warehouse.Id);
+
+                if (!alreadyExists)
+                {
+                    var stock = new SalesProductStock
+                    {
+                        SalesProductId = salesProductId,
+                        WarehouseId = warehouse.Id,
+                        Stock = 0,
+                        CriticalStock = 0,
+                        Price = 0
+                    };
+                    await _salesProductStockRepository.AddAsync(stock);
+                }
+            }
+
+            await _salesProductStockRepository.SaveAsync();
+        }
+
 
         public async Task<SalesProduct?> GetByIdAsync(int id)
         {
@@ -71,6 +105,24 @@ namespace IndustryX.Application.Services
             _salesProductRepository.Delete(salesProduct);
             await _salesProductRepository.SaveAsync();
             return true;
+        }
+
+        public async Task<List<SalesProduct>> GetActiveListAsync()
+        {
+            return await _salesProductRepository.GetQueryable()
+                .Where(p => p.IsActive)
+                .Include(p => p.Images)
+                .ToListAsync();
+        }
+
+        public async Task<SalesProduct?> GetByUrlAsync(string url)
+        {
+            return await _salesProductRepository.GetQueryable()
+                .Include(p => p.Images)
+                .Include(p => p.Product)
+                .Include(p => p.SalesProductCategories)
+                    .ThenInclude(spc => spc.Category)
+                .FirstOrDefaultAsync(p => p.Url == url && p.IsActive);
         }
     }
 }

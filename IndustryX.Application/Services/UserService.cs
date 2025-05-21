@@ -1,4 +1,4 @@
-﻿using IndustryX.Application.Services.Interfaces;
+﻿using IndustryX.Application.Interfaces;
 using IndustryX.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

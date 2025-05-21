@@ -1,7 +1,6 @@
 using IndustryX.Application.Interfaces;
 using IndustryX.Application.Services;
 using IndustryX.Application.Services.Implementations;
-using IndustryX.Application.Services.Interfaces;
 using IndustryX.Domain.Entities;
 using IndustryX.Domain.Interfaces;
 using IndustryX.Infrastructure.Interfaces;
@@ -19,18 +18,23 @@ var builder = WebApplication.CreateBuilder(args);
 // ----------------------
 builder.Services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
 
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IRawMaterialService, RawMaterialService>();
-builder.Services.AddScoped<IWarehouseService, WarehouseService>();
-builder.Services.AddScoped<ILaborCostService, LaborCostService>();
-builder.Services.AddScoped<IProductStockService, ProductStockService>();
-builder.Services.AddScoped<IRawMaterialStockService, RawMaterialStockService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IProductionService, ProductionService>();
-builder.Services.AddScoped<IProductTransferService, ProductTransferService>();
+
+builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ILaborCostService, LaborCostService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IProductionService, ProductionService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IProductStockService, ProductStockService>();
+builder.Services.AddScoped<IProductTransferService, ProductTransferService>();
+builder.Services.AddScoped<IRawMaterialService, RawMaterialService>();
+builder.Services.AddScoped<IRawMaterialStockService, RawMaterialStockService>();
 builder.Services.AddScoped<ISalesProductService, SalesProductService>();
+builder.Services.AddScoped<IUserAddressService, UserAddressService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IWarehouseService, WarehouseService>();
+builder.Services.AddScoped<IWishlistService, WishlistService>();
 
 // ----------------------
 // DbContext

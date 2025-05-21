@@ -1,6 +1,7 @@
 ﻿@model IndustryX.WebUI.ViewModels.AdminDashboardViewModel
 @{
     ViewData["Title"] = "System Setup";
+    var stepReady = true;
 }
 
 <div class="my-4 p-4 bg-light shadow-sm rounded">
@@ -19,70 +20,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>Warehouse Definition</td>
-                    <td>
-                        <span class="badge @(Model.HasWarehouse ? "bg-success" : "bg-danger")">
-                            @(Model.HasWarehouse ? "Exists" : "Missing")
-                        </span>
-                    </td>
-                    <td>
-                        @if (!Model.HasWarehouse)
-                        {
-                            <a asp-controller="Warehouse" asp-action="Create" class="btn btn-sm btn-outline-primary">
-                                Define Now
-                            </a>
-                        }
-                    </td>
-                </tr>
-                <tr>
-                    <td>Main Product Warehouse</td>
-                    <td>
-                        <span class="badge @(Model.HasMainProductWarehouse ? "bg-success" : "bg-danger")">
-                            @(Model.HasMainProductWarehouse ? "Exists" : "Missing")
-                        </span>
-                    </td>
-                    <td>
-                        @if (!Model.HasMainProductWarehouse)
-                        {
-                            <a asp-controller="Warehouse" asp-action="Index" class="btn btn-sm btn-outline-primary">
-                                Define Now
-                            </a>
-                        }
-                    </td>
-                </tr>
-                <tr>
-                    <td>Main Raw Material Warehouse</td>
-                    <td>
-                        <span class="badge @(Model.HasMainRawMaterialWarehouse ? "bg-success" : "bg-danger")">
-                            @(Model.HasMainRawMaterialWarehouse ? "Exists" : "Missing")
-                        </span>
-                    </td>
-                    <td>
-                        @if (!Model.HasMainRawMaterialWarehouse)
-                        {
-                            <a asp-controller="Warehouse" asp-action="Index" class="btn btn-sm btn-outline-primary">
-                                Define Now
-                            </a>
-                        }
-                    </td>
-                </tr>
-                <tr>
-                    <td>Main Sales Product Warehouse</td>
-                    <td>
-                        <span class="badge @(Model.HasMainSalesProductWarehouse ? "bg-success" : "bg-danger")">
-                            @(Model.HasMainSalesProductWarehouse ? "Exists" : "Missing")
-                        </span>
-                    </td>
-                    <td>
-                        @if (!Model.HasMainSalesProductWarehouse)
-                        {
-                            <a asp-controller="Warehouse" asp-action="Index" class="btn btn-sm btn-outline-primary">
-                                Define Now
-                            </a>
-                        }
-                    </td>
-                </tr>
+                <!-- 1. Labor Cost -->
                 <tr>
                     <td>Labor Cost</td>
                     <td>
@@ -91,30 +29,108 @@
                         </span>
                     </td>
                     <td>
-                        @if (!Model.HasLaborCost)
+                        @if (!Model.HasLaborCost && stepReady)
                         {
-                            <a asp-controller="GeneralSettings" asp-action="ListLabor" class="btn btn-sm btn-outline-primary">
-                                Define Now
-                            </a>
+                            <a asp-controller="GeneralSettings" asp-action="ListLabor" class="btn btn-sm btn-outline-primary">Define Now</a>
+                            stepReady = false;
+                        }
+                        else if (!Model.HasLaborCost)
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" disabled>Define Now</button>
+                            stepReady = false;
                         }
                     </td>
                 </tr>
+
+                <!-- 2. Warehouse -->
                 <tr>
-                    <td>Product Definition</td>
+                    <td>Warehouse Definition</td>
                     <td>
-                        <span class="badge @(Model.HasProduct ? "bg-success" : "bg-danger")">
-                            @(Model.HasProduct ? "Exists" : "Missing")
+                        <span class="badge @(Model.HasWarehouse ? "bg-success" : "bg-danger")">
+                            @(Model.HasWarehouse ? "Exists" : "Missing")
                         </span>
                     </td>
                     <td>
-                        @if (!Model.HasProduct)
+                        @if (!Model.HasWarehouse && stepReady)
                         {
-                            <a asp-controller="Product" asp-action="Create" class="btn btn-sm btn-outline-primary">
-                                Define Now
-                            </a>
+                            <a asp-controller="Warehouse" asp-action="Create" class="btn btn-sm btn-outline-primary">Define Now</a>
+                            stepReady = false;
+                        }
+                        else if (!Model.HasWarehouse)
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" disabled>Define Now</button>
+                            stepReady = false;
                         }
                     </td>
                 </tr>
+
+                <!-- 3. Main Product Warehouse -->
+                <tr>
+                    <td>Main Product Warehouse</td>
+                    <td>
+                        <span class="badge @(Model.HasMainProductWarehouse ? "bg-success" : "bg-danger")">
+                            @(Model.HasMainProductWarehouse ? "Exists" : "Missing")
+                        </span>
+                    </td>
+                    <td>
+                        @if (!Model.HasMainProductWarehouse && stepReady)
+                        {
+                            <a asp-controller="Warehouse" asp-action="Index" class="btn btn-sm btn-outline-primary">Define Now</a>
+                            stepReady = false;
+                        }
+                        else if (!Model.HasMainProductWarehouse)
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" disabled>Define Now</button>
+                            stepReady = false;
+                        }
+                    </td>
+                </tr>
+
+                <!-- 4. Main Raw Material Warehouse -->
+                <tr>
+                    <td>Main Raw Material Warehouse</td>
+                    <td>
+                        <span class="badge @(Model.HasMainRawMaterialWarehouse ? "bg-success" : "bg-danger")">
+                            @(Model.HasMainRawMaterialWarehouse ? "Exists" : "Missing")
+                        </span>
+                    </td>
+                    <td>
+                        @if (!Model.HasMainRawMaterialWarehouse && stepReady)
+                        {
+                            <a asp-controller="Warehouse" asp-action="Index" class="btn btn-sm btn-outline-primary">Define Now</a>
+                            stepReady = false;
+                        }
+                        else if (!Model.HasMainRawMaterialWarehouse)
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" disabled>Define Now</button>
+                            stepReady = false;
+                        }
+                    </td>
+                </tr>
+
+                <!-- 5. Main Sales Warehouse -->
+                <tr>
+                    <td>Main Sales Product Warehouse</td>
+                    <td>
+                        <span class="badge @(Model.HasMainSalesProductWarehouse ? "bg-success" : "bg-danger")">
+                            @(Model.HasMainSalesProductWarehouse ? "Exists" : "Missing")
+                        </span>
+                    </td>
+                    <td>
+                        @if (!Model.HasMainSalesProductWarehouse && stepReady)
+                        {
+                            <a asp-controller="Warehouse" asp-action="Index" class="btn btn-sm btn-outline-primary">Define Now</a>
+                            stepReady = false;
+                        }
+                        else if (!Model.HasMainSalesProductWarehouse)
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" disabled>Define Now</button>
+                            stepReady = false;
+                        }
+                    </td>
+                </tr>
+
+                <!-- 6. Raw Material -->
                 <tr>
                     <td>Raw Material Definition</td>
                     <td>
@@ -123,11 +139,183 @@
                         </span>
                     </td>
                     <td>
-                        @if (!Model.HasRawMaterial)
+                        @if (!Model.HasRawMaterial && stepReady)
                         {
-                            <a asp-controller="RawMaterial" asp-action="Create" class="btn btn-sm btn-outline-primary">
-                                Define Now
-                            </a>
+                            <a asp-controller="RawMaterial" asp-action="Create" class="btn btn-sm btn-outline-primary">Define Now</a>
+                            stepReady = false;
+                        }
+                        else if (!Model.HasRawMaterial)
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" disabled>Define Now</button>
+                            stepReady = false;
+                        }
+                    </td>
+                </tr>
+
+                <!-- 7. Product -->
+                <tr>
+                    <td>Product Definition</td>
+                    <td>
+                        <span class="badge @(Model.HasProduct ? "bg-success" : "bg-danger")">
+                            @(Model.HasProduct ? "Exists" : "Missing")
+                        </span>
+                    </td>
+                    <td>
+                        @if (!Model.HasProduct && stepReady)
+                        {
+                            <a asp-controller="Product" asp-action="Create" class="btn btn-sm btn-outline-primary">Define Now</a>
+                            stepReady = false;
+                        }
+                        else if (!Model.HasProduct)
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" disabled>Define Now</button>
+                            stepReady = false;
+                        }
+                    </td>
+                </tr>
+
+                <!-- 8. Category -->
+                <tr>
+                    <td>Category Definition</td>
+                    <td>
+                        <span class="badge @(Model.HasCategory ? "bg-success" : "bg-danger")">
+                            @(Model.HasCategory ? "Exists" : "Missing")
+                        </span>
+                    </td>
+                    <td>
+                        @if (!Model.HasCategory && stepReady)
+                        {
+                            <a asp-controller="Category" asp-action="Create" class="btn btn-sm btn-outline-primary">Define Now</a>
+                            stepReady = false;
+                        }
+                        else if (!Model.HasCategory)
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" disabled>Define Now</button>
+                            stepReady = false;
+                        }
+                    </td>
+                </tr>
+
+                <!-- 9. SalesProduct -->
+                <tr>
+                    <td>Sales Product Definition</td>
+                    <td>
+                        <span class="badge @(Model.HasSalesProduct ? "bg-success" : "bg-danger")">
+                            @(Model.HasSalesProduct ? "Exists" : "Missing")
+                        </span>
+                    </td>
+                    <td>
+                        @if (!Model.HasSalesProduct && stepReady)
+                        {
+                            <a asp-controller="SalesProduct" asp-action="Create" class="btn btn-sm btn-outline-primary">Define Now</a>
+                            stepReady = false;
+                        }
+                        else if (!Model.HasSalesProduct)
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" disabled>Define Now</button>
+                            stepReady = false;
+                        }
+                    </td>
+                </tr>
+
+                <!-- 10–13. Role Users -->
+                <tr>
+                    <td>Sales Manager User</td>
+                    <td>
+                        <span class="badge @(Model.HasSalesManager ? "bg-success" : "bg-danger")">
+                            @(Model.HasSalesManager ? "Exists" : "Missing")
+                        </span>
+                    </td>
+                    <td>
+                        @if (!Model.HasSalesManager && stepReady)
+                        {
+                            <a asp-controller="User" asp-action="Create" class="btn btn-sm btn-outline-primary">Create Now</a>
+                            stepReady = false;
+                        }
+                        else if (!Model.HasSalesManager)
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" disabled>Create Now</button>
+                            stepReady = false;
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td>Warehouse Manager User</td>
+                    <td>
+                        <span class="badge @(Model.HasWarehouseManager ? "bg-success" : "bg-danger")">
+                            @(Model.HasWarehouseManager ? "Exists" : "Missing")
+                        </span>
+                    </td>
+                    <td>
+                        @if (!Model.HasWarehouseManager && stepReady)
+                        {
+                            <a asp-controller="User" asp-action="Create" class="btn btn-sm btn-outline-primary">Create Now</a>
+                            stepReady = false;
+                        }
+                        else if (!Model.HasWarehouseManager)
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" disabled>Create Now</button>
+                            stepReady = false;
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td>Production Manager User</td>
+                    <td>
+                        <span class="badge @(Model.HasProductionManager ? "bg-success" : "bg-danger")">
+                            @(Model.HasProductionManager ? "Exists" : "Missing")
+                        </span>
+                    </td>
+                    <td>
+                        @if (!Model.HasProductionManager && stepReady)
+                        {
+                            <a asp-controller="User" asp-action="Create" class="btn btn-sm btn-outline-primary">Create Now</a>
+                            stepReady = false;
+                        }
+                        else if (!Model.HasProductionManager)
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" disabled>Create Now</button>
+                            stepReady = false;
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td>Driver User</td>
+                    <td>
+                        <span class="badge @(Model.HasDriver ? "bg-success" : "bg-danger")">
+                            @(Model.HasDriver ? "Exists" : "Missing")
+                        </span>
+                    </td>
+                    <td>
+                        @if (!Model.HasDriver && stepReady)
+                        {
+                            <a asp-controller="User" asp-action="Create" class="btn btn-sm btn-outline-primary">Create Now</a>
+                            stepReady = false;
+                        }
+                        else if (!Model.HasDriver)
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" disabled>Create Now</button>
+                            stepReady = false;
+                        }
+                    </td>
+                </tr>
+
+                <!-- 12. Each Warehouse Has Manager -->
+                <tr>
+                    <td>Each Warehouse Has Manager</td>
+                    <td>
+                        <span class="badge @(Model.AllWarehousesHaveManager ? "bg-success" : "bg-danger")">
+                            @(Model.AllWarehousesHaveManager ? "OK" : "Missing")
+                        </span>
+                    </td>
+                    <td>
+                        @if (!Model.AllWarehousesHaveManager && stepReady)
+                        {
+                            <a asp-controller="User" asp-action="Index" class="btn btn-sm btn-outline-primary">Assign Now</a>
+                        }
+                        else if (!Model.AllWarehousesHaveManager)
+                        {
+                            <button class="btn btn-sm btn-outline-secondary" disabled>Assign Now</button>
                         }
                     </td>
                 </tr>

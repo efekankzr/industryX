@@ -1,6 +1,5 @@
 ﻿using System.Security.Claims;
 using IndustryX.Application.Interfaces;
-using IndustryX.Application.Services.Interfaces;
 using IndustryX.Domain.Entities;
 using IndustryX.WebUI.ViewModels;
 using Microsoft.AspNetCore.Authorization;

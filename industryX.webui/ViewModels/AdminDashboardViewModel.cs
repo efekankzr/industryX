@@ -9,6 +9,14 @@
         public bool HasLaborCost { get; set; }
         public bool HasRawMaterial { get; set; }
         public bool HasProduct { get; set; }
+        public bool HasCategory { get; set; }
+        public bool HasSalesProduct { get; set; }
+
+        public bool HasSalesManager { get; set; }
+        public bool HasWarehouseManager { get; set; }
+        public bool HasProductionManager { get; set; }
+        public bool HasDriver { get; set; }
+        public bool AllWarehousesHaveManager { get; set; }
 
         public bool IsSetupComplete =>
             HasWarehouse &&
@@ -17,6 +25,13 @@
             HasMainSalesProductWarehouse &&
             HasLaborCost &&
             HasRawMaterial &&
-            HasProduct;
+            HasProduct &&
+            HasCategory &&
+            HasSalesProduct &&
+            HasSalesManager &&
+            HasWarehouseManager &&
+            HasProductionManager &&
+            HasDriver &&
+            AllWarehousesHaveManager;
     }
 }

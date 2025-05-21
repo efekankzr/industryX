@@ -19,7 +19,6 @@ namespace IndustryX.WebUI.Controllers
             _emailService = emailService;
         }
 
-        [HttpGet]
         public IActionResult Login() => View();
 
         [HttpPost]
@@ -61,7 +60,6 @@ namespace IndustryX.WebUI.Controllers
         }
 
 
-        [HttpGet]
         public IActionResult Register() => View();
 
         [HttpPost]
@@ -81,6 +79,8 @@ namespace IndustryX.WebUI.Controllers
 
             if (result.Succeeded)
             {
+                await _userManager.AddToRoleAsync(user, "Customer");
+
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 var confirmationLink = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, token }, Request.Scheme);
 
@@ -100,7 +100,6 @@ namespace IndustryX.WebUI.Controllers
             return View(model);
         }
 
-        [HttpGet]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
             var user = await _userManager.FindByIdAsync(userId);

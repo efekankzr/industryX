@@ -1,0 +1,52 @@
+﻿@model List<IndustryX.Domain.Entities.WishlistItem>
+
+@{
+    ViewData["Title"] = "My Wishlist";
+}
+
+<div class="my-4">
+    <h2 class="text-primary"><i class="fas fa-heart"></i> My Wishlist</h2>
+    <hr />
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">Your wishlist is empty.</div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach (var item in Model)
+            {
+                var product = item.SalesProduct;
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <img src="@product.Images.FirstOrDefault()?.ImagePath"
+                             class="card-img-top"
+                             alt="@product.Name"
+                             style="height: 200px; object-fit: cover;" />
+
+                        <div class="card-body">
+                            <h5 class="card-title">@product.Name</h5>
+                            <p class="card-text text-muted">@product.SalePrice.ToString("C")</p>
+                        </div>
+
+                        <div class="card-footer d-flex justify-content-between">
+                            <form asp-action="AddToCart" asp-route-id="@product.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="fas fa-cart-plus me-1"></i> Add to Cart
+                                </button>
+                            </form>
+
+                            <form asp-action="RemoveFromWishlist" asp-route-id="@product.Id" method="post" class="d-inline"
+                                  onsubmit="return confirm('Are you sure you want to remove this item?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

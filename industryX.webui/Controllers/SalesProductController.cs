@@ -2,11 +2,13 @@
 using IndustryX.Domain.Entities;
 using IndustryX.Persistence.Contexts;
 using IndustryX.WebUI.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace IndustryX.WebUI.Controllers
 {
+    [Authorize(Roles = "Admin,SalesManager")]
     public class SalesProductController : BaseController
     {
         private readonly ISalesProductService _salesProductService;
@@ -33,7 +35,6 @@ namespace IndustryX.WebUI.Controllers
             return View(salesProducts);
         }
 
-        [HttpGet]
         public async Task<IActionResult> Create()
         {
             var model = await BuildCreateViewModelAsync();
@@ -65,7 +66,6 @@ namespace IndustryX.WebUI.Controllers
                 Images = new List<SalesProductImage>()
             };
 
-            // Resim Yükleme
             await UploadImagesAsync(model.Images, salesProduct.Images);
 
             var result = await _salesProductService.CreateAsync(salesProduct);
@@ -75,6 +75,8 @@ namespace IndustryX.WebUI.Controllers
                 await LoadCategoriesAndProducts(model);
                 return View(model);
             }
+
+            await _salesProductService.InitializeSalesProductStocksAsync(salesProduct.Id);
 
             ShowAlert("Success", "Sales product created successfully.", "success");
             return RedirectToAction("Index");

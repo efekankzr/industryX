@@ -1,0 +1,127 @@
+﻿@model IndustryX.WebUI.ViewModels.SalesProductDetailViewModel
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="row my-4">
+    <!-- Product Images -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="position-relative">
+                <button class="btn btn-light position-absolute top-50 start-0 translate-middle-y" id="prevBtn" style="z-index:1;">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <img id="mainImage" src="@Model.ImagePaths.FirstOrDefault()" class="card-img-top img-fluid rounded" style="max-height: 400px; object-fit: contain;" />
+                <button class="btn btn-light position-absolute top-50 end-0 translate-middle-y" id="nextBtn" style="z-index:1;">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    @for (int i = 0; i < Model.ImagePaths.Count; i++)
+                    {
+                        <div class="col-3">
+                            <img src="@Model.ImagePaths[i]" class="img-thumbnail thumb-img @(i == 0 ? "border-primary" : "")"
+                                 data-index="@i"
+                                 style="height: 80px; object-fit: cover;" />
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Details -->
+    <div class="col-md-6">
+        <h1 class="h3 mb-3">@Model.Name</h1>
+
+        <div class="mb-3">
+            <span class="h4 text-success">@Model.Price.ToString("C")</span>
+        </div>
+
+        <p class="mb-4">@Model.Description</p>
+
+        <!-- Quantity Selection -->
+        <div class="mb-4">
+            <label class="form-label me-2">Quantity:</label>
+            <select class="form-select w-auto d-inline" id="quantitySelect">
+                @for (int i = 1; i <= 10; i++)
+                {
+                    <option value="@i">@i</option>
+                }
+            </select>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-grid gap-2 mb-4">
+            <form asp-action="AddToCart" method="POST" class="w-100" asp-route-id="@Model.Id">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-cart-plus me-1"></i> Add to Cart
+                </button>
+            </form>
+            <form asp-controller="Shop" asp-action="AddToWishlist" method="POST" asp-route-id="@Model.Id">
+                <button type="submit" class="btn btn-outline-danger w-100">
+                    <i class="far fa-heart me-1"></i> Add to Wishlist
+                </button>
+            </form>            
+        </div>
+
+        <!-- Additional Info -->
+        <div class="mt-4">
+            <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-truck text-primary me-2"></i>
+                <span>Free shipping on orders over 50₺</span>
+            </div>
+            <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-undo text-primary me-2"></i>
+                <span>30-day return guarantee</span>
+            </div>
+            <div class="d-flex align-items-center">
+                <i class="fas fa-shield-alt text-primary me-2"></i>
+                <span>2-year warranty</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentIndex = 0;
+        const images = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ImagePaths));
+        const mainImage = document.getElementById("mainImage");
+        const quantitySelect = document.getElementById("quantitySelect");
+        const quantityInput = document.getElementById("quantityInput");
+
+        document.querySelectorAll(".thumb-img").forEach(img => {
+            img.addEventListener("click", function () {
+                const index = parseInt(this.dataset.index);
+                setImage(index);
+            });
+        });
+
+        document.getElementById("prevBtn").addEventListener("click", () => {
+            if (currentIndex > 0) {
+                setImage(currentIndex - 1);
+            }
+        });
+
+        document.getElementById("nextBtn").addEventListener("click", () => {
+            if (currentIndex < images.length - 1) {
+                setImage(currentIndex + 1);
+            }
+        });
+
+        quantitySelect.addEventListener("change", function () {
+            quantityInput.value = this.value;
+        });
+
+        function setImage(index) {
+            currentIndex = index;
+            mainImage.src = images[index];
+
+            // border değiştirme
+            document.querySelectorAll(".thumb-img").forEach(img => img.classList.remove("border-primary"));
+            document.querySelector(`.thumb-img[data-index="${index}"]`).classList.add("border-primary");
+        }
+    </script>
+}

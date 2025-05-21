@@ -1,8 +1,27 @@
-﻿@{
-    ViewData["Title"] = "Welcome";
+﻿@model List<IndustryX.WebUI.ViewModels.SalesProductListItemViewModel>
+
+@{
+    ViewData["Title"] = "Shop";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome to IndustryX</h1>
-    <p class="lead">This is your production and e-commerce automation system.</p>
+<div class="my-4">
+    <h2 class="text-center text-primary mb-4">
+        <i class="fas fa-store"></i> Our Products
+    </h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">No products available for sale at the moment.</div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach (var product in Model)
+            {
+                <div class="col">
+                    @await Html.PartialAsync("_ProductCard", product)
+                </div>
+            }
+        </div>
+    }
 </div>
