@@ -28,7 +28,6 @@ namespace IndustryX.WebUI.Controllers
             _context = context;
         }
 
-        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var salesProducts = await _salesProductService.GetAllAsync();
@@ -82,7 +81,6 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction("Index");
         }
 
-        [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
             var salesProduct = await _salesProductService.GetByIdAsync(id);
@@ -177,7 +175,7 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction("Index");
         }
 
-        [HttpPost("delete/{id}")]
+        [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
             var success = await _salesProductService.DeleteAsync(id);
@@ -189,7 +187,7 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction("Index");
         }
 
-        [HttpPost("delete-image/{imageId}")]
+        [HttpPost]
         public async Task<IActionResult> DeleteImage(int imageId)
         {
             var image = await _context.SalesProductImages

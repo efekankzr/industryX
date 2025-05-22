@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace IndustryX.WebUI.Controllers
 {
     [Authorize]
-    [Route("payment")]
     public class PaymentController : BaseController
     {
         private readonly IOrderService _orderService;
@@ -18,7 +17,6 @@ namespace IndustryX.WebUI.Controllers
             _iyzicoService = iyzicoService;
         }
 
-        [HttpGet("checkout/{orderId}")]
         public async Task<IActionResult> Checkout(int orderId)
         {
             var order = await _orderService.GetByIdAsync(orderId);
@@ -41,7 +39,7 @@ namespace IndustryX.WebUI.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("callback")]
+        [HttpPost]
         public async Task<IActionResult> Callback([FromQuery] int orderId)
         {
             var result = await _orderService.MarkAsPaidAsync(orderId);
@@ -53,13 +51,11 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction("Failure");
         }
 
-        [HttpGet("success")]
         public IActionResult Success()
         {
             return View();
         }
 
-        [HttpGet("failure")]
         public IActionResult Failure()
         {
             return View();

@@ -31,7 +31,6 @@ namespace IndustryX.WebUI.Controllers
             await next();
         }
 
-        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -113,7 +112,6 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction("Addresses");
         }
 
-        [HttpGet]
         public async Task<IActionResult> EditAddress(int id)
         {
             var userId = _userManager.GetUserId(User);
@@ -178,7 +176,6 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction("Addresses");
         }
 
-        [HttpGet]
         public IActionResult ChangePassword()
         {
             return View(new ChangePasswordViewModel());

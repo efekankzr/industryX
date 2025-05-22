@@ -6,13 +6,15 @@
     <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
 
     <h2 class="text-success mb-3">Payment Successful</h2>
-    <p class="text-muted mb-4">Thank you! Your payment has been completed successfully. You can track your order from your account.</p>
+    <p class="text-muted mb-4">
+        Thank you! Your payment has been completed successfully. You can track your order from your account.
+    </p>
 
     <div class="d-flex justify-content-center gap-3">
-        <a href="/" class="btn btn-outline-primary">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary">
             <i class="fas fa-home me-1"></i> Return to Homepage
         </a>
-        <a href="/my-orders" class="btn btn-success">
+        <a asp-controller="Shop" asp-action="MyOrders" class="btn btn-success">
             <i class="fas fa-box-open me-1"></i> View My Orders
         </a>
     </div>

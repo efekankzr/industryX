@@ -34,7 +34,6 @@ namespace IndustryX.WebUI.Controllers
         public IActionResult Index() => View();
 
         [AllowAnonymous]
-        [HttpGet("productdetail/{url}")]
         public async Task<IActionResult> Details(string url)
         {
             var product = await _salesProductService.GetByUrlAsync(url);
@@ -58,7 +57,6 @@ namespace IndustryX.WebUI.Controllers
         }
 
         [Authorize]
-        [HttpGet("cart")]
         public async Task<IActionResult> Cart()
         {
             var userId = GetUserId();
@@ -79,17 +77,19 @@ namespace IndustryX.WebUI.Controllers
         }
 
         [Authorize]
-        [HttpPost("cart/add/{id}")]
-        public async Task<IActionResult> AddToCart(int id)
+        [HttpPost]
+        public async Task<IActionResult> AddToCart(int id, int quantity = 1)
         {
             var userId = GetUserId();
-            await _cartService.AddToCartAsync(userId, id);
+            if (userId == null) return Unauthorized();
+
+            await _cartService.AddToCartAsync(userId, id, quantity);
             ShowAlert("Success", "Item added to cart.", "success");
             return RedirectToAction("Cart");
         }
 
         [Authorize]
-        [HttpPost("cart/remove/{id}")]
+        [HttpPost]
         public async Task<IActionResult> RemoveFromCart(int id)
         {
             var userId = GetUserId();
@@ -99,7 +99,6 @@ namespace IndustryX.WebUI.Controllers
         }
 
         [Authorize]
-        [HttpGet("checkout")]
         public async Task<IActionResult> Checkout()
         {
             var userId = GetUserId();
@@ -132,7 +131,7 @@ namespace IndustryX.WebUI.Controllers
         }
 
         [Authorize]
-        [HttpPost("checkout")]
+        [HttpPost]
         public async Task<IActionResult> Checkout(CheckoutViewModel model)
         {
             var userId = GetUserId();
@@ -172,7 +171,6 @@ namespace IndustryX.WebUI.Controllers
         }
 
         [Authorize]
-        [HttpGet("my-orders")]
         public async Task<IActionResult> MyOrders()
         {
             var userId = GetUserId();
@@ -181,7 +179,6 @@ namespace IndustryX.WebUI.Controllers
         }
 
         [Authorize]
-        [HttpGet("order-detail/{id}")]
         public async Task<IActionResult> OrderDetail(int id)
         {
             var userId = GetUserId();
@@ -196,7 +193,6 @@ namespace IndustryX.WebUI.Controllers
         }
 
         [Authorize]
-        [HttpGet("wishlist")]
         public async Task<IActionResult> Wishlist()
         {
             var userId = GetUserId();
@@ -205,7 +201,7 @@ namespace IndustryX.WebUI.Controllers
         }
 
         [Authorize]
-        [HttpPost("wishlist/add/{id}")]
+        [HttpPost]
         public async Task<IActionResult> AddToWishlist(int id)
         {
             var userId = GetUserId();
@@ -215,7 +211,7 @@ namespace IndustryX.WebUI.Controllers
         }
 
         [Authorize]
-        [HttpPost("wishlist/remove/{id}")]
+        [HttpPost]
         public async Task<IActionResult> RemoveFromWishlist(int id)
         {
             var userId = GetUserId();
