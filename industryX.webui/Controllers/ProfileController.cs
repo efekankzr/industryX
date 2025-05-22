@@ -93,6 +93,8 @@ namespace IndustryX.WebUI.Controllers
             var entity = new UserAddress
             {
                 UserId = userId,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
                 Title = model.Title,
                 Country = model.Country,
                 City = model.City,
@@ -121,6 +123,8 @@ namespace IndustryX.WebUI.Controllers
             var model = new UserAddressViewModel
             {
                 Id = address.Id,
+                FirstName = address.FirstName,
+                LastName = address.LastName,
                 Title = address.Title,
                 Country = address.Country,
                 City = address.City,
@@ -140,12 +144,14 @@ namespace IndustryX.WebUI.Controllers
             var entity = new UserAddress
             {
                 Id = model.Id,
+                UserId = userId,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
                 Title = model.Title,
                 Country = model.Country,
                 City = model.City,
                 District = model.District,
-                FullAddress = model.FullAddress,
-                UserId = userId
+                FullAddress = model.FullAddress
             };
 
             var result = await _addressService.UpdateAsync(entity, userId);

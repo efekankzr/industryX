@@ -1,0 +1,32 @@
+﻿@model IndustryX.WebUI.ViewModels.AddressInputModel
+
+<div class="row">
+    <div class="col-md-6 mb-2">
+        <label class="form-label">First Name</label>
+        <input name="CustomAddress.FirstName" value="@Model.FirstName" class="form-control" />
+    </div>
+    <div class="col-md-6 mb-2">
+        <label class="form-label">Last Name</label>
+        <input name="CustomAddress.LastName" value="@Model.LastName" class="form-control" />
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6 mb-2">
+        <label class="form-label">Country</label>
+        <input name="CustomAddress.Country" value="@Model.Country" class="form-control" />
+    </div>
+    <div class="col-md-6 mb-2">
+        <label class="form-label">City</label>
+        <input name="CustomAddress.City" value="@Model.City" class="form-control" />
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6 mb-2">
+        <label class="form-label">District</label>
+        <input name="CustomAddress.District" value="@Model.District" class="form-control" />
+    </div>
+</div>
+<div class="mb-2">
+    <label class="form-label">Full Address</label>
+    <textarea name="CustomAddress.FullAddress" class="form-control">@Model.FullAddress</textarea>
+</div>

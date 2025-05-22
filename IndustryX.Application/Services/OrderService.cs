@@ -32,7 +32,11 @@ namespace IndustryX.Application.Services
                     SalesProductId = ci.SalesProductId,
                     Quantity = ci.Quantity,
                     UnitPrice = ci.SalesProduct.SalePrice
-                }).ToList()
+                }).ToList(),
+                // Varsayılan durumlar
+                Status = OrderStatus.Pending,
+                IsPaid = false
+                // Not: Adres bilgileri checkout sırasında ViewModel'den alınmalı
             };
 
             await _orderRepository.AddAsync(order);
@@ -51,6 +55,35 @@ namespace IndustryX.Application.Services
                 .Where(o => o.UserId == userId)
                 .OrderByDescending(o => o.CreatedAt)
                 .ToListAsync();
+        }
+
+        public async Task SaveOrderAsync(Order order)
+        {
+            await _orderRepository.AddAsync(order);
+            await _orderRepository.SaveAsync();
+        }
+
+        public async Task<bool> MarkAsPaidAsync(int orderId, string paymentProvider = "", string transactionId = "")
+        {
+            var order = await _orderRepository.GetByIdAsync(orderId);
+            if (order == null || order.IsPaid)
+                return false;
+
+            order.IsPaid = true;
+            order.PaymentProvider = paymentProvider;
+            order.PaymentTransactionId = transactionId;
+
+            await _orderRepository.SaveAsync();
+            return true;
+        }
+
+        public async Task<Order?> GetByIdAsync(int id)
+        {
+            return await _orderRepository
+                .GetQueryable()
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.SalesProduct)
+                .FirstOrDefaultAsync(o => o.Id == id);
         }
     }
 }

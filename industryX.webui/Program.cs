@@ -8,6 +8,8 @@ using IndustryX.Infrastructure.Services;
 using IndustryX.Infrastructure.Settings;
 using IndustryX.Persistence.Contexts;
 using IndustryX.Persistence.Repositories;
+using IndustryX.Services.Abstract;
+using IndustryX.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +18,9 @@ var builder = WebApplication.CreateBuilder(args);
 // ----------------------
 // DI: Services
 // ----------------------
+builder.Services.Configure<IyzicoOptions>(builder.Configuration.GetSection("IyzicoOptions"));
+builder.Services.AddScoped<IIyzicoService, IyzicoService>();
+
 builder.Services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
 
 builder.Services.AddScoped<IEmailService, EmailService>();

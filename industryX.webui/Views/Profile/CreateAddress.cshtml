@@ -14,6 +14,18 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="mb-3">
+                    <label asp-for="FirstName" class="form-label">First Name</label>
+                    <input asp-for="FirstName" class="form-control" />
+                    <span asp-validation-for="FirstName" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="LastName" class="form-label">Last Name</label>
+                    <input asp-for="LastName" class="form-control" />
+                    <span asp-validation-for="LastName" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
                     <label asp-for="Title" class="form-label">Address Title</label>
                     <input asp-for="Title" class="form-control" placeholder="e.g. Home, Work" />
                     <span asp-validation-for="Title" class="text-danger small"></span>
@@ -41,7 +53,7 @@
             <div class="col-md-6">
                 <div class="mb-3">
                     <label asp-for="FullAddress" class="form-label">Full Address</label>
-                    <textarea asp-for="FullAddress" class="form-control" rows="9"></textarea>
+                    <textarea asp-for="FullAddress" class="form-control" rows="10"></textarea>
                     <span asp-validation-for="FullAddress" class="text-danger small"></span>
                 </div>
             </div>

@@ -5,45 +5,82 @@
 }
 
 <div class="my-4">
-    <h2 class="text-primary"><i class="fas fa-box"></i> My Orders</h2>
+    <h2 class="text-primary">
+        <i class="fas fa-box-open"></i> My Orders
+    </h2>
     <hr />
 
     @if (!Model.Any())
     {
-        <div class="alert alert-info">You have no past orders.</div>
+        <div class="alert alert-info shadow-sm">
+            <i class="fas fa-info-circle me-1"></i> You have no past orders.
+        </div>
     }
     else
     {
         foreach (var order in Model)
         {
-            <div class="border rounded p-3 mb-4 bg-light">
-                <h5 class="mb-2">Order #@order.Id</h5>
-                <p class="mb-2 text-muted">Date: @order.CreatedAt.ToString("dd MMM yyyy HH:mm")</p>
-
-                <table class="table table-sm table-bordered text-center">
-                    <thead class="table-secondary">
-                        <tr>
-                            <th>Product</th>
-                            <th>Unit Price</th>
-                            <th>Quantity</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in order.OrderItems)
-                        {
+            <div class="card shadow-sm mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center bg-white">
+                    <div>
+                        <strong>Order #@order.Id</strong> <span class="text-muted ms-2">@order.CreatedAt.ToString("dd MMM yyyy HH:mm")</span>
+                    </div>
+                    <span class="badge @GetStatusClass(order.Status)">
+                        @order.Status.ToString()
+                    </span>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-bordered mb-3 text-center align-middle">
+                        <thead class="table-light">
                             <tr>
-                                <td>@item.SalesProduct.Name</td>
-                                <td>@item.UnitPrice.ToString("C")</td>
-                                <td>@item.Quantity</td>
-                                <td>@(item.Quantity * item.UnitPrice).ToString("C")</td>
+                                <th>Product</th>
+                                <th>Unit Price</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in order.OrderItems)
+                            {
+                                <tr>
+                                    <td>@item.SalesProduct.Name</td>
+                                    <td>@item.UnitPrice.ToString("C")</td>
+                                    <td>@item.Quantity</td>
+                                    <td>@item.TotalPrice.ToString("C")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
 
-                <p class="fw-bold text-end me-2">Total: @order.TotalPrice.ToString("C")</p>
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-semibold">
+                            Payment:
+                            <span class="badge @(order.IsPaid ? "bg-success" : "bg-warning text-dark")">
+                                @(order.IsPaid ? "Paid" : "Pending")
+                            </span>
+                        </span>
+
+                        <p class="fw-bold text-end fs-5">
+                            Total: @order.TotalPrice.ToString("C")
+                        </p>
+                    </div>
+                </div>
             </div>
         }
     }
 </div>
+
+@functions {
+    private string GetStatusClass(IndustryX.Domain.Entities.OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "bg-secondary",
+            OrderStatus.Processing => "bg-primary",
+            OrderStatus.Shipped => "bg-info text-dark",
+            OrderStatus.Delivered => "bg-success",
+            OrderStatus.Cancelled => "bg-danger",
+            _ => "bg-dark"
+        };
+    }
+}

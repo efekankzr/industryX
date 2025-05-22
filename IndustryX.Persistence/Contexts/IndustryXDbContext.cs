@@ -25,10 +25,10 @@ namespace IndustryX.Persistence.Contexts
         public DbSet<SalesProduct> SalesProducts { get; set; }
         public DbSet<SalesProductCategory> SalesProductCategories { get; set; }
         public DbSet<SalesProductImage> SalesProductImages { get; set; }
+        public DbSet<SalesProductStock> SalesProductStocks { get; set; }
         public DbSet<UserAddress> UserAddresses { get; set; }
         public DbSet<Warehouse> Warehouses { get; set; }
         public DbSet<WishlistItem> WishlistItems { get; set; }
-        public DbSet<SalesProductStock> SalesProductStocks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -49,6 +49,12 @@ namespace IndustryX.Persistence.Contexts
 
             modelBuilder.Entity<OrderItem>()
                 .Ignore(x => x.TotalPrice);
+
+            modelBuilder.Entity<Order>(order =>
+            {
+                order.OwnsOne(o => o.BillingAddress);
+                order.OwnsOne(o => o.ShippingAddress);
+            });
         }
     }
 }
