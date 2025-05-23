@@ -1,4 +1,4 @@
-﻿@model List<SalesProductListItemViewModel>
+﻿@model List<IndustryX.WebUI.ViewModels.ProductCardViewModel>
 @{
     ViewData["Title"] = "Products";
     var term = ViewBag.SearchTerm as string;
@@ -28,25 +28,25 @@
             @foreach (var item in Model)
             {
                 <div class="col">
-                    @await Html.PartialAsync("_ProductCard", item)
+                    @await Component.InvokeAsync("ProductCard", item)
                 </div>
             }
         </div>
 
         <div class="mt-4 d-flex justify-content-center">
             @await Component.InvokeAsync("Pagination", new PaginationViewModel
-               {
-                   CurrentPage = currentPage,
-                   TotalItems = totalItems,
-                   PageSize = pageSize,
-                   ActionName = "Search",
-                   ControllerName = "Shop",
-                   RouteValues = new Dictionary<string, string?>
-                   {
-                       ["q"] = term,
-                       ["category"] = category
-                   }
-               })
+   {
+       CurrentPage = currentPage,
+       TotalItems = totalItems,
+       PageSize = pageSize,
+       ActionName = string.IsNullOrWhiteSpace(term) ? "List" : "Search",
+       ControllerName = "Shop",
+       RouteValues = new Dictionary<string, string?>
+       {
+           ["q"] = term,
+           ["category"] = category
+       }
+   })
         </div>
     }
     else

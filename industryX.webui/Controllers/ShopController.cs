@@ -54,13 +54,17 @@ namespace IndustryX.WebUI.Controllers
             var totalCount = products.Count;
             var paged = products.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-            var viewModel = paged.Select(p => new SalesProductListItemViewModel
+            var viewModel = paged.Select(p => new ProductCardViewModel
             {
-                Id = p.Id,
-                Name = p.Name,
-                Price = p.SalePrice,
-                Url = p.Url,
-                ImagePath = p.Images.FirstOrDefault()?.ImagePath
+                Product = new SalesProductListItemViewModel
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Price = p.SalePrice,
+                    Url = p.Url,
+                    ImagePath = p.Images.FirstOrDefault()?.ImagePath
+                },
+                IsWishlist = false
             }).ToList();
 
             ViewBag.SearchTerm = q;
@@ -68,7 +72,13 @@ namespace IndustryX.WebUI.Controllers
             {
                 CurrentPage = page,
                 TotalItems = totalCount,
-                PageSize = pageSize
+                PageSize = pageSize,
+                ActionName = "Search",
+                ControllerName = "Shop",
+                RouteValues = new Dictionary<string, string?>
+                {
+                    ["q"] = q
+                }
             };
 
             return View("Search", viewModel);
@@ -100,13 +110,17 @@ namespace IndustryX.WebUI.Controllers
             var totalCount = filtered.Count;
             var paged = filtered.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-            var viewModel = paged.Select(p => new SalesProductListItemViewModel
+            var viewModel = paged.Select(p => new ProductCardViewModel
             {
-                Id = p.Id,
-                Name = p.Name,
-                Price = p.SalePrice,
-                Url = p.Url,
-                ImagePath = p.Images.FirstOrDefault()?.ImagePath
+                Product = new SalesProductListItemViewModel
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Price = p.SalePrice,
+                    Url = p.Url,
+                    ImagePath = p.Images.FirstOrDefault()?.ImagePath
+                },
+                IsWishlist = false
             }).ToList();
 
             ViewBag.Category = category;
@@ -114,7 +128,13 @@ namespace IndustryX.WebUI.Controllers
             {
                 CurrentPage = page,
                 TotalItems = totalCount,
-                PageSize = pageSize
+                PageSize = pageSize,
+                ActionName = "List",
+                ControllerName = "Shop",
+                RouteValues = new Dictionary<string, string?>
+                {
+                    ["category"] = category
+                }
             };
 
             return View("Search", viewModel);
@@ -332,7 +352,21 @@ namespace IndustryX.WebUI.Controllers
         {
             var userId = GetUserId();
             var items = await _wishlistService.GetUserWishlistAsync(userId!);
-            return View(items);
+
+            var viewModels = items.Select(x => new ProductCardViewModel
+            {
+                Product = new SalesProductListItemViewModel
+                {
+                    Id = x.SalesProduct.Id,
+                    Name = x.SalesProduct.Name,
+                    Price = x.SalesProduct.SalePrice,
+                    Url = x.SalesProduct.Url,
+                    ImagePath = x.SalesProduct.Images.FirstOrDefault()?.ImagePath
+                },
+                IsWishlist = true
+            }).ToList();
+
+            return View(viewModels);
         }
 
         [Authorize, HttpPost]

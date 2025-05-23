@@ -47,13 +47,17 @@ namespace IndustryX.WebUI.Controllers
 
             var salesProducts = await _salesProductService.GetActiveListAsync();
 
-            var model = salesProducts.Select(p => new SalesProductListItemViewModel
+            var model = salesProducts.Select(p => new ProductCardViewModel
             {
-                Id = p.Id,
-                Name = p.Name,
-                Price = p.SalePrice,
-                Url = p.Url,
-                ImagePath = p.Images.FirstOrDefault()?.ImagePath
+                Product = new SalesProductListItemViewModel
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Price = p.SalePrice,
+                    Url = p.Url,
+                    ImagePath = p.Images.FirstOrDefault()?.ImagePath
+                },
+                IsWishlist = false
             }).ToList();
 
             return View(model);
