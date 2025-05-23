@@ -16,16 +16,19 @@ namespace IndustryX.WebUI.Controllers
             _categoryService = categoryService;
         }
 
+        // ----------------------------
+        // LIST CATEGORIES
+        // ----------------------------
         public async Task<IActionResult> Index()
         {
             var categories = await _categoryService.GetAllAsync();
             return View(categories);
         }
 
-        public IActionResult Create()
-        {
-            return View();
-        }
+        // ----------------------------
+        // CREATE
+        // ----------------------------
+        public IActionResult Create() => View();
 
         [HttpPost]
         public async Task<IActionResult> Create(CategoryViewModel model)
@@ -40,6 +43,7 @@ namespace IndustryX.WebUI.Controllers
             };
 
             var result = await _categoryService.CreateAsync(category);
+
             if (!result.Success)
             {
                 ModelState.AddModelError("", result.Error!);
@@ -47,16 +51,19 @@ namespace IndustryX.WebUI.Controllers
             }
 
             ShowAlert("Success", "Category created successfully.", "success");
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
+        // ----------------------------
+        // EDIT
+        // ----------------------------
         public async Task<IActionResult> Edit(int id)
         {
             var category = await _categoryService.GetByIdAsync(id);
             if (category == null)
             {
                 ShowAlert("Error", "Category not found.", "danger");
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
 
             var model = new CategoryViewModel
@@ -83,6 +90,7 @@ namespace IndustryX.WebUI.Controllers
             };
 
             var result = await _categoryService.UpdateAsync(category);
+
             if (!result.Success)
             {
                 ModelState.AddModelError("", result.Error!);
@@ -90,20 +98,23 @@ namespace IndustryX.WebUI.Controllers
             }
 
             ShowAlert("Success", "Category updated successfully.", "success");
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
+        // ----------------------------
+        // DELETE
+        // ----------------------------
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _categoryService.DeleteAsync(id);
 
             if (deleted)
-                ShowAlert("Success", "Category deleted.", "success");
+                ShowAlert("Success", "Category deleted successfully.", "success");
             else
                 ShowAlert("Error", "Category not found or could not be deleted.", "danger");
 
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
     }
 }

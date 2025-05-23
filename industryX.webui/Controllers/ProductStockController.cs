@@ -12,7 +12,8 @@ namespace IndustryX.WebUI.Controllers
         private readonly IProductStockService _productStockService;
         private readonly IUserService _userService;
 
-        public ProductStockController(IProductStockService productStockService,
+        public ProductStockController(
+            IProductStockService productStockService,
             IUserService userService)
         {
             _productStockService = productStockService;
@@ -21,31 +22,27 @@ namespace IndustryX.WebUI.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var allStocks = await _productStockService.GetAllWithIncludesAsync();
+            var stocks = await _productStockService.GetAllWithIncludesAsync();
 
             if (User.IsInRole("Admin"))
-            {
-                return View(allStocks);
-            }
+                return View(stocks);
 
             if (User.IsInRole("WarehouseManager"))
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
+                var userId = GetUserId();
                 var user = await _userService.GetByIdAsync(userId);
-                Console.WriteLine($"UserId: {userId}, WarehouseId: {user?.WarehouseId}");
-                if (user == null || user.WarehouseId == null)
+
+                if (user?.WarehouseId == null)
                 {
-                    ShowAlert("Error", "No warehouse is assigned to your user profile.", "danger");
+                    ShowAlert("Error", "No warehouse is assigned to your profile.", "danger");
                     return View(Enumerable.Empty<ProductStock>());
                 }
 
-                var userWarehouseId = user.WarehouseId.Value;
-                var filtered = allStocks
-                    .Where(s => s.WarehouseId == userWarehouseId)
+                var filteredStocks = stocks
+                    .Where(s => s.WarehouseId == user.WarehouseId.Value)
                     .ToList();
 
-                return View(filtered);
+                return View(filteredStocks);
             }
 
             return Forbid();
@@ -63,12 +60,18 @@ namespace IndustryX.WebUI.Controllers
 
             var success = await _productStockService.SetCriticalStockAsync(id, critical);
 
-            if (!success)
-                ShowAlert("Error", "Failed to set critical stock.", "danger");
-            else
-                ShowAlert("Success", "Critical stock updated.", "success");
+            ShowAlert(
+                success ? "Success" : "Error",
+                success ? "Critical stock updated." : "Failed to update critical stock.",
+                success ? "success" : "danger"
+            );
 
             return RedirectToAction(nameof(Index));
+        }
+
+        private string GetUserId()
+        {
+            return User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         }
     }
 }

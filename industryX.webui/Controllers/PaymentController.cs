@@ -32,9 +32,7 @@ namespace IndustryX.WebUI.Controllers
                 return RedirectToAction("MyOrders", "Shop");
             }
 
-            var htmlContent = await _iyzicoService.CreatePaymentRequestAsync(order);
-            ViewBag.CheckoutForm = htmlContent;
-
+            ViewBag.CheckoutForm = await _iyzicoService.CreatePaymentRequestAsync(order);
             return View();
         }
 
@@ -42,23 +40,12 @@ namespace IndustryX.WebUI.Controllers
         [HttpPost]
         public async Task<IActionResult> Callback([FromQuery] int orderId)
         {
-            var result = await _orderService.MarkAsPaidAsync(orderId);
-            if (result)
-            {
-                return RedirectToAction("Success");
-            }
-
-            return RedirectToAction("Failure");
+            var success = await _orderService.MarkAsPaidAsync(orderId);
+            return RedirectToAction(success ? "Success" : "Failure");
         }
 
-        public IActionResult Success()
-        {
-            return View();
-        }
+        public IActionResult Success() => View();
 
-        public IActionResult Failure()
-        {
-            return View();
-        }
+        public IActionResult Failure() => View();
     }
 }

@@ -34,7 +34,14 @@
                         </td>
                         <td>@item.ProductName</td>
                         <td>@item.UnitPrice.ToString("C")</td>
-                        <td>@item.Quantity</td>
+                        <td>
+                            <form asp-action="UpdateQuantity" method="post" class="d-flex justify-content-center align-items-center gap-1">
+                                <input type="hidden" name="SalesProductId" value="@item.SalesProductId" />
+                                <button type="submit" name="action" value="decrease" class="btn btn-sm btn-outline-secondary">-</button>
+                                <input type="text" name="Quantity" value="@item.Quantity" class="form-control text-center" style="width: 50px;" readonly />
+                                <button type="submit" name="action" value="increase" class="btn btn-sm btn-outline-secondary">+</button>
+                            </form>
+                        </td>
                         <td>@item.Total.ToString("C")</td>
                         <td>
                             <form asp-action="RemoveFromCart" asp-route-id="@item.SalesProductId" method="post" class="d-inline">

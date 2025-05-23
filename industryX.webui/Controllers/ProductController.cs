@@ -12,9 +12,7 @@ namespace IndustryX.WebUI.Controllers
         private readonly IProductService _productService;
         private readonly IRawMaterialService _rawMaterialService;
 
-        public ProductController(
-            IProductService productService,
-            IRawMaterialService rawMaterialService)
+        public ProductController(IProductService productService, IRawMaterialService rawMaterialService)
         {
             _productService = productService;
             _rawMaterialService = rawMaterialService;
@@ -29,25 +27,22 @@ namespace IndustryX.WebUI.Controllers
         public async Task<IActionResult> Create()
         {
             var rawMaterials = await _rawMaterialService.GetAllAsync();
-
             if (!rawMaterials.Any())
             {
                 ShowAlert("Warning", "You must add at least one raw material before creating a product.", "warning");
                 return RedirectToAction("Index", "RawMaterial");
             }
 
-            var model = new ProductCreateViewModel
+            return View(new ProductCreateViewModel
             {
                 RawMaterials = rawMaterials.Select(rm => new RawMaterialInputViewModel
                 {
                     RawMaterialId = rm.Id,
                     RawMaterialName = rm.Name
                 }).ToList()
-            };
-
-            return View(model);
+            });
         }
-        
+
         [HttpPost]
         public async Task<IActionResult> Create(ProductCreateViewModel model)
         {
@@ -58,8 +53,8 @@ namespace IndustryX.WebUI.Controllers
             }
 
             var product = MapToProductEntity(model);
-
             var (success, error) = await _productService.CreateAsync(product);
+
             if (!success)
             {
                 ShowAlert("Error", error!, "danger");
@@ -67,7 +62,7 @@ namespace IndustryX.WebUI.Controllers
                 return View(model);
             }
 
-            ShowAlert("Product Created", "Product successfully created.", "success");
+            ShowAlert("Success", "Product successfully created.", "success");
             return RedirectToAction(nameof(Index));
         }
 
@@ -76,19 +71,19 @@ namespace IndustryX.WebUI.Controllers
             var product = await _productService.GetByIdAsync(id);
             if (product == null)
             {
-                ShowAlert("Not Found", "Product not found.", "danger");
+                ShowAlert("Error", "Product not found.", "danger");
                 return RedirectToAction(nameof(Index));
             }
 
-            var allMaterials = await _rawMaterialService.GetAllAsync();
-            var viewModel = new ProductEditViewModel
+            var rawMaterials = await _rawMaterialService.GetAllAsync();
+            return View(new ProductEditViewModel
             {
                 Id = product.Id,
                 Name = product.Name,
                 Barcode = product.Barcode,
                 PiecesInBox = product.PiecesInBox,
                 MaterialPrice = product.MaterialPrice,
-                RawMaterials = allMaterials.Select(rm =>
+                RawMaterials = rawMaterials.Select(rm =>
                 {
                     var receipt = product.ProductReceipts.FirstOrDefault(r => r.RawMaterialId == rm.Id);
                     return new RawMaterialInputViewModel
@@ -99,9 +94,7 @@ namespace IndustryX.WebUI.Controllers
                         Quantity = receipt?.Quantity
                     };
                 }).ToList()
-            };
-
-            return View(viewModel);
+            });
         }
 
         [HttpPost]
@@ -114,8 +107,8 @@ namespace IndustryX.WebUI.Controllers
             }
 
             var product = MapToProductEntity(model);
-
             var (success, error) = await _productService.UpdateAsync(product);
+
             if (!success)
             {
                 ShowAlert("Error", error!, "danger");
@@ -142,13 +135,13 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // ---------------------------------------
+        // --------------------
         // Helpers
-        // ---------------------------------------
-
+        // --------------------
         private async Task LoadRawMaterialsIntoModel(ProductBaseViewModel model)
         {
             var rawMaterials = await _rawMaterialService.GetAllAsync();
+
             model.RawMaterials = rawMaterials.Select(rm =>
             {
                 var existing = model.RawMaterials.FirstOrDefault(x => x.RawMaterialId == rm.Id);
@@ -166,7 +159,7 @@ namespace IndustryX.WebUI.Controllers
         {
             return new Product
             {
-                Id = (model is ProductEditViewModel edit) ? edit.Id : 0,
+                Id = model is ProductEditViewModel edit ? edit.Id : 0,
                 Name = model.Name,
                 Barcode = model.Barcode,
                 PiecesInBox = model.PiecesInBox,
@@ -175,8 +168,7 @@ namespace IndustryX.WebUI.Controllers
                     .Select(r => new ProductReceipt
                     {
                         RawMaterialId = r.RawMaterialId,
-                        Quantity = r.Quantity!.Value,
-                        Include = true
+                        Quantity = r.Quantity!.Value
                     }).ToList()
             };
         }

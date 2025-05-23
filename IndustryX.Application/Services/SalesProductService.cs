@@ -112,6 +112,8 @@ namespace IndustryX.Application.Services
             return await _salesProductRepository.GetQueryable()
                 .Where(p => p.IsActive)
                 .Include(p => p.Images)
+                .Include(p => p.SalesProductCategories)
+                    .ThenInclude(spc => spc.Category)
                 .ToListAsync();
         }
 

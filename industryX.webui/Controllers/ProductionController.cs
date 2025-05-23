@@ -21,7 +21,6 @@ namespace IndustryX.WebUI.Controllers
         public async Task<IActionResult> Index()
         {
             var isAdmin = User.IsInRole("Admin");
-
             var productions = await _productionService.GetAllAsync();
 
             if (!isAdmin)
@@ -48,11 +47,12 @@ namespace IndustryX.WebUI.Controllers
 
         public async Task<IActionResult> Create()
         {
-            var model = new ProductionFormViewModel
+            var products = await _productService.GetAllAsync();
+
+            return View(new ProductionFormViewModel
             {
-                Products = (await _productService.GetAllAsync()).ToList()
-            };
-            return View(model);
+                Products = products.ToList()
+            });
         }
 
         [HttpPost]
@@ -74,7 +74,7 @@ namespace IndustryX.WebUI.Controllers
             var (success, error) = await _productionService.CreateAsync(production);
             if (!success)
             {
-                ShowAlert("Error", error ?? "Production could not be created.", "danger");
+                ShowAlert("Error", error ?? "Failed to create production.", "danger");
                 return View(model);
             }
 
@@ -86,11 +86,10 @@ namespace IndustryX.WebUI.Controllers
         public async Task<IActionResult> Start(int id)
         {
             var success = await _productionService.StartProductionAsync(id);
-            ShowAlert(
-                success ? "Started" : "Error",
-                success ? "Production started successfully." : "Failed to start production.",
-                success ? "success" : "danger"
-            );
+            ShowAlert(success ? "Started" : "Error",
+                      success ? "Production started successfully." : "Failed to start production.",
+                      success ? "success" : "danger");
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -98,11 +97,10 @@ namespace IndustryX.WebUI.Controllers
         public async Task<IActionResult> Pause(int id)
         {
             var success = await _productionService.PauseProductionAsync(id);
-            ShowAlert(
-                success ? "Paused" : "Error",
-                success ? "Production paused successfully." : "Failed to pause production.",
-                success ? "warning" : "danger"
-            );
+            ShowAlert(success ? "Paused" : "Error",
+                      success ? "Production paused successfully." : "Failed to pause production.",
+                      success ? "warning" : "danger");
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -110,11 +108,10 @@ namespace IndustryX.WebUI.Controllers
         public async Task<IActionResult> Resume(int id)
         {
             var success = await _productionService.ResumeProductionAsync(id);
-            ShowAlert(
-                success ? "Resumed" : "Error",
-                success ? "Production resumed successfully." : "Failed to resume production.",
-                success ? "info" : "danger"
-            );
+            ShowAlert(success ? "Resumed" : "Error",
+                      success ? "Production resumed successfully." : "Failed to resume production.",
+                      success ? "info" : "danger");
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -122,12 +119,11 @@ namespace IndustryX.WebUI.Controllers
         public async Task<IActionResult> Finish(int id)
         {
             var success = await _productionService.FinishProductionAsync(id);
-            ShowAlert(
-                success ? "Completed" : "Error",
-                success ? "Production completed successfully." : "Failed to finish production.",
-                success ? "success" : "danger"
-            );
+            ShowAlert(success ? "Completed" : "Error",
+                      success ? "Production completed successfully." : "Failed to finish production.",
+                      success ? "success" : "danger");
+
             return RedirectToAction(nameof(Index));
-        }        
+        }
     }
 }

@@ -24,26 +24,24 @@ namespace IndustryX.WebUI.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
             if (user != null)
-            {
                 ViewData["CurrentUser"] = user;
-            }
 
             await next();
         }
+
+        // -------------------- Profile Info --------------------
 
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return NotFound();
 
-            var model = new ProfileViewModel
+            return View(new ProfileViewModel
             {
                 Firstname = user.Firstname,
                 Surname = user.Surname,
                 Email = user.Email
-            };
-
-            return View(model);
+            });
         }
 
         [HttpPost]
@@ -58,7 +56,6 @@ namespace IndustryX.WebUI.Controllers
             user.Surname = model.Surname;
 
             var result = await _userManager.UpdateAsync(user);
-
             if (result.Succeeded)
             {
                 ShowAlert("Profile Updated", "Your profile has been updated successfully.", "success");
@@ -71,17 +68,41 @@ namespace IndustryX.WebUI.Controllers
             return View(model);
         }
 
+        // -------------------- Change Password --------------------
+
+        public IActionResult ChangePassword() => View(new ChangePasswordViewModel());
+
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return NotFound();
+
+            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (result.Succeeded)
+            {
+                ShowAlert("Success", "Password changed successfully.", "success");
+                return RedirectToAction("Index");
+            }
+
+            foreach (var error in result.Errors)
+                ShowAlert("Error", error.Description, "danger");
+
+            return View(model);
+        }
+
+        // -------------------- Addresses --------------------
+
         public async Task<IActionResult> Addresses()
         {
-            var user = await _userManager.GetUserAsync(User);
-            var addresses = await _addressService.GetUserAddressesAsync(user.Id);
+            var userId = _userManager.GetUserId(User);
+            var addresses = await _addressService.GetUserAddressesAsync(userId);
             return View(addresses);
         }
 
-        public IActionResult CreateAddress()
-        {
-            return View(new UserAddressViewModel());
-        }
+        public IActionResult CreateAddress() => View(new UserAddressViewModel());
 
         [HttpPost]
         public async Task<IActionResult> CreateAddress(UserAddressViewModel model)
@@ -89,7 +110,7 @@ namespace IndustryX.WebUI.Controllers
             if (!ModelState.IsValid) return View(model);
 
             var userId = _userManager.GetUserId(User);
-            var entity = new UserAddress
+            var address = new UserAddress
             {
                 UserId = userId,
                 FirstName = model.FirstName,
@@ -101,7 +122,7 @@ namespace IndustryX.WebUI.Controllers
                 FullAddress = model.FullAddress
             };
 
-            var result = await _addressService.CreateAsync(entity);
+            var result = await _addressService.CreateAsync(address);
             if (!result.Success)
             {
                 ModelState.AddModelError("", result.Error!);
@@ -118,7 +139,7 @@ namespace IndustryX.WebUI.Controllers
             var address = await _addressService.GetByIdAsync(id, userId);
             if (address == null) return NotFound();
 
-            var model = new UserAddressViewModel
+            return View(new UserAddressViewModel
             {
                 Id = address.Id,
                 FirstName = address.FirstName,
@@ -128,9 +149,7 @@ namespace IndustryX.WebUI.Controllers
                 City = address.City,
                 District = address.District,
                 FullAddress = address.FullAddress
-            };
-
-            return View(model);
+            });
         }
 
         [HttpPost]
@@ -167,8 +186,9 @@ namespace IndustryX.WebUI.Controllers
         public async Task<IActionResult> DeleteAddress(int id)
         {
             var userId = _userManager.GetUserId(User);
-            var success = await _addressService.DeleteAsync(id, userId);
-            if (success)
+            var result = await _addressService.DeleteAsync(id, userId);
+
+            if (result)
                 ShowAlert("Deleted", "Address has been deleted.", "info");
             else
                 ShowAlert("Error", "Address could not be deleted.", "danger");
@@ -176,37 +196,12 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction("Addresses");
         }
 
-        public IActionResult ChangePassword()
-        {
-            return View(new ChangePasswordViewModel());
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
-        {
-            if (!ModelState.IsValid) return View(model);
-
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return NotFound();
-
-            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
-            if (result.Succeeded)
-            {
-                ShowAlert("Success", "Password changed successfully.", "success");
-                return RedirectToAction("Index");
-            }
-
-            foreach (var error in result.Errors)
-                ShowAlert("Error", error.Description, "danger");
-
-            return View(model);
-        }
-
         [HttpPost]
         public async Task<IActionResult> SetDefaultAddress(int id)
         {
             var userId = _userManager.GetUserId(User);
             var result = await _addressService.SetAsDefaultAsync(id, userId);
+
             if (result)
                 ShowAlert("Success", "Default address updated.", "success");
             else

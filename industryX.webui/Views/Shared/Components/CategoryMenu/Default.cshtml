@@ -1,0 +1,17 @@
+﻿@model List<IndustryX.Domain.Entities.Category>
+
+@if (Model.Any())
+{
+    @foreach (var category in Model)
+    {
+        <li>
+            <a class="dropdown-item" asp-controller="Shop" asp-action="List" asp-route-category="@category.Url">
+                @category.Name
+            </a>
+        </li>
+    }
+}
+else
+{
+    <li><span class="dropdown-item disabled">No categories</span></li>
+}

@@ -9,9 +9,9 @@ namespace IndustryX.WebUI.Controllers
     {
         private readonly IWarehouseService _warehouseService;
         private readonly IProductService _productService;
-        private readonly IProductTransferService _productTransferService;
         private readonly IRawMaterialService _rawMaterialService;
         private readonly ILaborCostService _laborCostService;
+        private readonly IProductTransferService _productTransferService;
         private readonly ISalesProductService _salesProductService;
         private readonly IUserService _userService;
         private readonly ICategoryService _categoryService;
@@ -36,13 +36,14 @@ namespace IndustryX.WebUI.Controllers
             _categoryService = categoryService;
         }
 
+        // -------------------------------
+        // Homepage for Visitors & Users
+        // -------------------------------
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            if (User.Identity != null && User.Identity.IsAuthenticated && !User.IsInRole("Customer"))
-            {
+            if (User.Identity?.IsAuthenticated == true && !User.IsInRole("Customer"))
                 return await RedirectDasboards();
-            }
 
             var salesProducts = await _salesProductService.GetActiveListAsync();
 
@@ -58,6 +59,9 @@ namespace IndustryX.WebUI.Controllers
             return View(model);
         }
 
+        // -------------------------------
+        // Redirect to Role-Based Dashboards
+        // -------------------------------
         public async Task<IActionResult> RedirectDasboards()
         {
             if (User.IsInRole("Admin"))
@@ -80,6 +84,9 @@ namespace IndustryX.WebUI.Controllers
             return Forbid();
         }
 
+        // -------------------------------
+        // Admin Dashboards
+        // -------------------------------
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> SetupDashboard()
         {
@@ -87,23 +94,24 @@ namespace IndustryX.WebUI.Controllers
             return View(model);
         }
 
-
         [Authorize(Roles = "Admin")]
         public IActionResult AdminDashboard() => View();
 
+        // -------------------------------
+        // Role-Specific Dashboards
+        // -------------------------------
         [Authorize(Roles = "Driver")]
         public async Task<IActionResult> DriverDashboard()
         {
-            var createdTransfers = await _productTransferService.GetAllCreatedTransfersAsync();
-            return View(createdTransfers);
+            var transfers = await _productTransferService.GetAllCreatedTransfersAsync();
+            return View(transfers);
         }
-
 
         [Authorize(Roles = "WarehouseManager")]
         public async Task<IActionResult> WarehouseManagerDashboard()
         {
-            var inTransitTransfers = await _productTransferService.GetAllInTransitTransfersAsync();
-            return View(inTransitTransfers);
+            var transfers = await _productTransferService.GetAllInTransitTransfersAsync();
+            return View(transfers);
         }
 
         [Authorize(Roles = "ProductionManager")]
@@ -112,59 +120,45 @@ namespace IndustryX.WebUI.Controllers
         [Authorize(Roles = "SalesManager")]
         public IActionResult SalesManagerDashboard() => View();
 
+        // -------------------------------
+        // Setup Check Logic
+        // -------------------------------
         private async Task<AdminDashboardViewModel> GetSetupStatusAsync()
         {
-            var hasWarehouse = (await _warehouseService.GetAllAsync()).Any();
-            var (mainProduct, mainRaw, mainSales) = await _warehouseService.CheckMainWarehousesAsync();
-            var hasLaborCost = (await _laborCostService.GetAllAsync()).Any();
-            var hasProduct = (await _productService.GetAllAsync()).Any();
-            var hasRawMaterial = (await _rawMaterialService.GetAllAsync()).Any();
-            var hasSalesProduct = (await _salesProductService.GetAllAsync()).Any();
-            var hasCategory = (await _categoryService.GetAllAsync()).Any();
+            var warehouses = await _warehouseService.GetAllAsync();
+            var (hasMainProduct, hasMainRaw, hasMainSales) = await _warehouseService.CheckMainWarehousesAsync();
 
-            var users = (await _userService.GetAllAsync()).ToList();
+            var model = new AdminDashboardViewModel
+            {
+                HasWarehouse = warehouses.Any(),
+                HasMainProductWarehouse = hasMainProduct,
+                HasMainRawMaterialWarehouse = hasMainRaw,
+                HasMainSalesProductWarehouse = hasMainSales,
+                HasLaborCost = (await _laborCostService.GetAllAsync()).Any(),
+                HasProduct = (await _productService.GetAllAsync()).Any(),
+                HasRawMaterial = (await _rawMaterialService.GetAllAsync()).Any(),
+                HasSalesProduct = (await _salesProductService.GetAllAsync()).Any(),
+                HasCategory = (await _categoryService.GetAllAsync()).Any(),
+                AllWarehousesHaveManager = await AllWarehousesAssignedAsync()
+            };
+
             var roles = new[] { "SalesManager", "WarehouseManager", "ProductionManager", "Driver" };
-
-            var roleCheckResults = new Dictionary<string, bool>();
 
             foreach (var role in roles)
             {
                 var usersInRole = await _userService.GetByRoleAsync(role);
-                roleCheckResults[role] = usersInRole.Any();
+                model.SetRolePresence(role, usersInRole.Any());
             }
 
+            return model;
+        }
+
+        private async Task<bool> AllWarehousesAssignedAsync()
+        {
             var warehouses = await _warehouseService.GetAllAsync();
-            bool allWarehousesHaveManager = true;
+            var managers = await _userService.GetByRoleAsync("WarehouseManager");
 
-            foreach (var warehouse in warehouses)
-            {
-                var warehouseManagers = await _userService.GetByRoleAsync("WarehouseManager");
-                var hasManager = warehouseManagers.Any(u => u.WarehouseId == warehouse.Id);
-
-                if (!hasManager)
-                {
-                    allWarehousesHaveManager = false;
-                    break;
-                }
-            }
-
-            return new AdminDashboardViewModel
-            {
-                HasWarehouse = hasWarehouse,
-                HasMainProductWarehouse = mainProduct,
-                HasMainRawMaterialWarehouse = mainRaw,
-                HasMainSalesProductWarehouse = mainSales,
-                HasLaborCost = hasLaborCost,
-                HasProduct = hasProduct,
-                HasCategory = hasCategory,
-                HasSalesProduct = hasSalesProduct,
-                HasRawMaterial = hasRawMaterial,
-                HasSalesManager = roleCheckResults["SalesManager"],
-                HasWarehouseManager = roleCheckResults["WarehouseManager"],
-                HasProductionManager = roleCheckResults["ProductionManager"],
-                HasDriver = roleCheckResults["Driver"],
-                AllWarehousesHaveManager = allWarehousesHaveManager
-            };
+            return warehouses.All(w => managers.Any(m => m.WarehouseId == w.Id));
         }
     }
 }

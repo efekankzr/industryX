@@ -27,21 +27,20 @@ namespace IndustryX.WebUI.Controllers
             _userService = userService;
         }
 
+        // ----------- Admin - Report & Direct Transfer -----------
+
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Report()
         {
-            var warehouses = await _warehouseService.GetAllAsync();
-            var transfers = await _transferService.GetFilteredAsync(null, null, null, null, null);
-
-            return View(new ProductTransferFilterViewModel
+            var viewModel = new ProductTransferFilterViewModel
             {
-                Warehouses = warehouses.ToList(),
-                Transfers = transfers.ToList()
-            });
+                Warehouses = (await _warehouseService.GetAllAsync()).ToList(),
+                Transfers = (await _transferService.GetFilteredAsync(null, null, null, null, null)).ToList()
+            };
+            return View(viewModel);
         }
 
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [HttpPost, Authorize(Roles = "Admin")]
         public async Task<IActionResult> Report(ProductTransferFilterViewModel model)
         {
             model.Warehouses = (await _warehouseService.GetAllAsync()).ToList();
@@ -59,20 +58,17 @@ namespace IndustryX.WebUI.Controllers
         public async Task<IActionResult> Detail(int id)
         {
             var (transfer, deficits) = await _transferService.GetDetailAsync(id);
-
             if (transfer == null)
             {
                 ShowAlert("Error", "Transfer not found.", "danger");
                 return RedirectToAction(nameof(Report));
             }
 
-            var viewModel = new ProductTransferDetailViewModel
+            return View(new ProductTransferDetailViewModel
             {
                 Transfer = transfer,
                 Deficits = deficits
-            };
-
-            return View(viewModel);
+            });
         }
 
         [Authorize(Roles = "Admin")]
@@ -119,6 +115,8 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction(nameof(Report));
         }
 
+        // ----------- WarehouseManager - Create & View -----------
+
         [Authorize(Roles = "WarehouseManager")]
         public async Task<IActionResult> Index()
         {
@@ -129,82 +127,54 @@ namespace IndustryX.WebUI.Controllers
         [Authorize(Roles = "WarehouseManager")]
         public async Task<IActionResult> Create()
         {
-            var userWarehouseId = await GetCurrentUserWarehouseIdAsync();
-            if (userWarehouseId == null)
+            var warehouseId = await GetCurrentUserWarehouseIdAsync();
+            if (warehouseId == null)
             {
                 ShowAlert("Error", "You don't have an assigned warehouse.", "danger");
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(await CreateFormModelAsync(userWarehouseId.Value));
+            return View(await CreateFormModelAsync(warehouseId.Value));
         }
 
-        [HttpPost]
-        [Authorize(Roles = "WarehouseManager")]
+        [HttpPost, Authorize(Roles = "WarehouseManager")]
         public async Task<IActionResult> Create(ProductTransferFormViewModel model)
         {
-            var userWarehouseId = await GetCurrentUserWarehouseIdAsync();
-            if (userWarehouseId == null)
+            var warehouseId = await GetCurrentUserWarehouseIdAsync();
+            if (warehouseId == null)
             {
                 ShowAlert("Error", "You don't have an assigned warehouse.", "danger");
                 return RedirectToAction(nameof(Index));
             }
 
-            model.SourceWarehouseId = userWarehouseId.Value;
+            model.SourceWarehouseId = warehouseId.Value;
 
             if (!ModelState.IsValid)
-            {
-                return View(await CreateFormModelAsync(userWarehouseId.Value, model));
-            }
+                return View(await CreateFormModelAsync(warehouseId.Value, model));
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
             var (success, error) = await _transferService.CreateAsync(
                 model.SourceWarehouseId,
                 model.DestinationWarehouseId,
                 model.ProductId,
                 model.TransferQuantityBox,
-                userId);
+                GetUserId());
 
             if (!success)
             {
                 ShowAlert("Error", error!, "danger");
-                return View(await CreateFormModelAsync(userWarehouseId.Value, model));
+                return View(await CreateFormModelAsync(warehouseId.Value, model));
             }
 
             ShowAlert("Success", "Transfer successfully created.", "success");
             return RedirectToAction(nameof(Index));
         }
 
-        private async Task<ProductTransferFormViewModel> CreateFormModelAsync(int userWarehouseId, ProductTransferFormViewModel? model = null)
-        {
-            var allWarehouses = (await _warehouseService.GetAllAsync()).ToList();
-            var filteredWarehouses = allWarehouses
-                .Where(w => w.Id != userWarehouseId)
-                .ToList();
-
-            return new ProductTransferFormViewModel
-            {
-                ProductId = model?.ProductId ?? 0,
-                SourceWarehouseId = userWarehouseId,
-                DestinationWarehouseId = model?.DestinationWarehouseId ?? 0,
-                TransferQuantityBox = model?.TransferQuantityBox ?? 0,
-                Products = (await _productService.GetAllAsync()).ToList(),
-                Warehouses = filteredWarehouses
-            };
-        }
-
-        private async Task<int?> GetCurrentUserWarehouseIdAsync()
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-            var user = await _userService.GetByIdAsync(userId);
-            return user?.WarehouseId;
-        }
+        // ----------- Barcode Flow - Scan, Accept, Complete -----------
 
         [Authorize(Roles = "WarehouseManager, Driver")]
         public IActionResult ScanTransfer() => View();
 
-        [HttpPost]
-        [Authorize(Roles = "WarehouseManager, Driver")]
+        [HttpPost, Authorize(Roles = "WarehouseManager, Driver")]
         public async Task<IActionResult> ScanTransfer(string barcode)
         {
             if (string.IsNullOrWhiteSpace(barcode))
@@ -233,10 +203,7 @@ namespace IndustryX.WebUI.Controllers
         [Authorize(Roles = "Driver")]
         public async Task<IActionResult> AcceptTransfer(string? barcode)
         {
-            if (string.IsNullOrWhiteSpace(barcode))
-                return View(new AcceptTransferViewModel());
-
-            var transfer = await _transferService.GetByBarcodeAsync(barcode.Trim());
+            var transfer = await _transferService.GetByBarcodeAsync(barcode?.Trim());
             if (transfer == null || transfer.Status != TransferStatus.Created)
             {
                 ShowAlert("Error", "No valid transfer found.", "danger");
@@ -253,18 +220,15 @@ namespace IndustryX.WebUI.Controllers
             });
         }
 
-        [HttpPost]
-        [Authorize(Roles = "Driver")]
+        [HttpPost, Authorize(Roles = "Driver")]
         public async Task<IActionResult> AcceptTransfer(AcceptTransferViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
+            if (!ModelState.IsValid) return View(model);
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
             var (success, error) = await _transferService.AcceptTransferAsync(
                 model.TransferBarcode.Trim(),
                 model.DeliveredBoxCount,
-                userId);
+                GetUserId());
 
             if (!success)
             {
@@ -279,10 +243,7 @@ namespace IndustryX.WebUI.Controllers
         [Authorize(Roles = "WarehouseManager")]
         public async Task<IActionResult> CompleteTransfer(string? barcode)
         {
-            if (string.IsNullOrWhiteSpace(barcode))
-                return View(new CompleteTransferViewModel());
-
-            var transfer = await _transferService.GetByBarcodeAsync(barcode.Trim());
+            var transfer = await _transferService.GetByBarcodeAsync(barcode?.Trim());
             if (transfer == null || transfer.Status != TransferStatus.InTransit)
             {
                 ShowAlert("Error", "No valid transfer found.", "danger");
@@ -299,18 +260,15 @@ namespace IndustryX.WebUI.Controllers
             });
         }
 
-        [HttpPost]
-        [Authorize(Roles = "WarehouseManager")]
+        [HttpPost, Authorize(Roles = "WarehouseManager")]
         public async Task<IActionResult> CompleteTransfer(CompleteTransferViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
+            if (!ModelState.IsValid) return View(model);
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
             var (success, error) = await _transferService.CompleteTransferAsync(
                 model.Barcode.Trim(),
                 model.ReceivedBoxCount,
-                userId);
+                GetUserId());
 
             if (!success)
             {
@@ -320,6 +278,37 @@ namespace IndustryX.WebUI.Controllers
 
             ShowAlert("Success", "Transfer completed and stock updated.", "success");
             return RedirectToAction(nameof(Index));
+        }
+
+        // ----------- Helpers -----------
+
+        private async Task<ProductTransferFormViewModel> CreateFormModelAsync(int? excludeWarehouseId = null, ProductTransferFormViewModel? model = null)
+        {
+            var warehouses = (await _warehouseService.GetAllAsync()).ToList();
+            var filteredWarehouses = excludeWarehouseId.HasValue
+                ? warehouses.Where(w => w.Id != excludeWarehouseId.Value).ToList()
+                : warehouses;
+
+            return new ProductTransferFormViewModel
+            {
+                ProductId = model?.ProductId ?? 0,
+                SourceWarehouseId = model?.SourceWarehouseId ?? 0,
+                DestinationWarehouseId = model?.DestinationWarehouseId ?? 0,
+                TransferQuantityBox = model?.TransferQuantityBox ?? 0,
+                Products = (await _productService.GetAllAsync()).ToList(),
+                Warehouses = filteredWarehouses
+            };
+        }
+
+        private async Task<int?> GetCurrentUserWarehouseIdAsync()
+        {
+            var user = await _userService.GetByIdAsync(GetUserId());
+            return user?.WarehouseId;
+        }
+
+        private string GetUserId()
+        {
+            return User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         }
     }
 }

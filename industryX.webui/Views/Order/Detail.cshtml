@@ -1,0 +1,100 @@
+﻿@model IndustryX.Domain.Entities.Order
+
+@{
+    ViewData["Title"] = $"Order #{Model.Id} Details";
+}
+
+<div class="my-4 p-4 bg-white shadow-sm rounded border">
+    <h2 class="text-primary mb-3">
+        <i class="fas fa-receipt me-2"></i> Order #@Model.Id
+    </h2>
+
+    <div class="d-flex justify-content-between mb-4">
+        <div>
+            <p><strong>Date:</strong> @Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</p>
+            <p>
+                <strong>Status:</strong>
+                <span class="badge bg-@GetStatusColor(Model.Status)">@Model.Status</span>
+            </p>
+            <p>
+                <strong>Payment:</strong>
+                @if (Model.IsPaid)
+                {
+                    <span class="badge bg-success">Paid</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">Unpaid</span>
+                }
+            </p>
+        </div>
+        <div class="text-end">
+            <h4 class="text-success">Cart Total: @Model.TotalPrice.ToString("C")</h4>
+        </div>
+    </div>
+
+    <hr />
+
+    <h5 class="text-dark mb-3"><i class="fas fa-box"></i> Products</h5>
+    <table class="table table-bordered text-center align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.OrderItems)
+            {
+                <tr>
+                    <td>@item.SalesProduct?.Name</td>
+                    <td>@item.Quantity</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <hr />
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h5><i class="fas fa-truck me-1"></i> Shipping Address</h5>
+            <div class="bg-light p-3 rounded">
+                <p class="mb-1 fw-bold">@Model.ShippingAddress.FullName</p>
+                <p class="mb-1">@Model.ShippingAddress.FullAddress</p>
+                <p class="mb-0">@Model.ShippingAddress.City, @Model.ShippingAddress.District</p>
+                <p class="mb-0">@Model.ShippingAddress.Country</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <h5><i class="fas fa-file-invoice me-1"></i> Billing Address</h5>
+            <div class="bg-light p-3 rounded">
+                <p class="mb-1 fw-bold">@Model.BillingAddress.FullName</p>
+                <p class="mb-1">@Model.BillingAddress.FullAddress</p>
+                <p class="mb-0">@Model.BillingAddress.City, @Model.BillingAddress.District</p>
+                <p class="mb-0">@Model.BillingAddress.Country</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4 d-flex justify-content-end">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Orders
+        </a>
+    </div>
+</div>
+
+@functions {
+    string GetStatusColor(IndustryX.Domain.Entities.OrderStatus status)
+    {
+        return status switch
+        {
+            IndustryX.Domain.Entities.OrderStatus.Pending => "secondary",
+            IndustryX.Domain.Entities.OrderStatus.Processing => "info",
+            IndustryX.Domain.Entities.OrderStatus.Shipped => "warning",
+            IndustryX.Domain.Entities.OrderStatus.Delivered => "success",
+            IndustryX.Domain.Entities.OrderStatus.Cancelled => "danger",
+            _ => "dark"
+        };
+    }
+}

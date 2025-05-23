@@ -16,6 +16,9 @@ namespace IndustryX.WebUI.Controllers
             _laborCostService = laborCostService;
         }
 
+        // ----------------------------
+        // LIST ALL LABOR COST RECORDS
+        // ----------------------------
         public async Task<IActionResult> ListLabor()
         {
             var viewModel = new LaborCostFormViewModel
@@ -26,6 +29,9 @@ namespace IndustryX.WebUI.Controllers
             return View(viewModel);
         }
 
+        // ----------------------------
+        // ADD NEW LABOR COST
+        // ----------------------------
         [HttpPost]
         public async Task<IActionResult> AddLaborCost(LaborCostFormViewModel model)
         {
@@ -35,17 +41,21 @@ namespace IndustryX.WebUI.Controllers
                 return View("ListLabor", model);
             }
 
-            var entity = new LaborCost
+            var newCost = new LaborCost
             {
                 HourlyWage = model.HourlyWage,
                 EffectiveDate = model.EffectiveDate
             };
 
-            await _laborCostService.AddAsync(entity);
-            ShowAlert("Success", "Hourly wage added.", "success");
+            await _laborCostService.AddAsync(newCost);
+
+            ShowAlert("Success", "Hourly wage added successfully.", "success");
             return RedirectToAction(nameof(ListLabor));
         }
 
+        // ----------------------------
+        // DELETE LABOR COST
+        // ----------------------------
         [HttpPost]
         public async Task<IActionResult> DeleteLaborCost(int id)
         {

@@ -1,0 +1,58 @@
+﻿@model List<SalesProductListItemViewModel>
+@{
+    ViewData["Title"] = "Products";
+    var term = ViewBag.SearchTerm as string;
+    var category = ViewBag.Category as string;
+    var currentPage = ViewBag.CurrentPage as int? ?? 1;
+    var totalItems = ViewBag.TotalItems as int? ?? 0;
+    var pageSize = ViewBag.PageSize as int? ?? 10;
+}
+
+<div class="my-4">
+    @if (!string.IsNullOrWhiteSpace(term))
+    {
+        <h4 class="mb-3">Results for: <span class="text-primary">"@term"</span></h4>
+    }
+    else if (!string.IsNullOrWhiteSpace(category))
+    {
+        <h4 class="mb-3">Category: <span class="text-primary">@category</span></h4>
+    }
+    else
+    {
+        <h4 class="mb-3">All Products</h4>
+    }
+
+    @if (Model.Any())
+    {
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col">
+                    @await Html.PartialAsync("_ProductCard", item)
+                </div>
+            }
+        </div>
+
+        <div class="mt-4 d-flex justify-content-center">
+            @await Component.InvokeAsync("Pagination", new PaginationViewModel
+               {
+                   CurrentPage = currentPage,
+                   TotalItems = totalItems,
+                   PageSize = pageSize,
+                   ActionName = "Search",
+                   ControllerName = "Shop",
+                   RouteValues = new Dictionary<string, string?>
+                   {
+                       ["q"] = term,
+                       ["category"] = category
+                   }
+               })
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning mt-3">
+            No products found.
+        </div>
+    }
+</div>

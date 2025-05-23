@@ -24,17 +24,16 @@ namespace IndustryX.WebUI.Controllers
             _roleManager = roleManager;
         }
 
+        // -------------------- LIST USERS --------------------
         public async Task<IActionResult> Index()
         {
             var users = await _userService.GetAllAsync();
-            var model = new List<UserListViewModel>();
-
             var targetRoles = new[] { "WarehouseManager", "Driver", "ProductionManager", "SalesManager" };
 
+            var model = new List<UserListViewModel>();
             foreach (var user in users)
             {
                 var roles = await _userService.GetRolesAsync(user.Id);
-
                 if (roles.Any(r => targetRoles.Contains(r)))
                 {
                     model.Add(new UserListViewModel
@@ -60,7 +59,6 @@ namespace IndustryX.WebUI.Controllers
             foreach (var user in users)
             {
                 var roles = await _userService.GetRolesAsync(user.Id);
-
                 if (roles.Contains("Customer"))
                 {
                     model.Add(new UserListViewModel
@@ -78,6 +76,7 @@ namespace IndustryX.WebUI.Controllers
             return View(model);
         }
 
+        // -------------------- CREATE --------------------
         public async Task<IActionResult> Create()
         {
             return View(await BuildCreateViewModel());
@@ -100,6 +99,7 @@ namespace IndustryX.WebUI.Controllers
             };
 
             var (success, error) = await _userService.CreateAsync(user, model.Password, model.Role, model.WarehouseId);
+
             if (!success)
             {
                 ShowAlert("Error", error!, "danger");
@@ -110,6 +110,7 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // -------------------- EDIT --------------------
         public async Task<IActionResult> Edit(string id)
         {
             var user = await _userService.GetByIdAsync(id);
@@ -126,8 +127,8 @@ namespace IndustryX.WebUI.Controllers
                 Surname = user.Surname,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
-                Role = (await _userService.GetRolesAsync(user.Id)).FirstOrDefault() ?? "",
-                WarehouseId = user.WarehouseId
+                WarehouseId = user.WarehouseId,
+                Role = (await _userService.GetRolesAsync(user.Id)).FirstOrDefault() ?? ""
             };
 
             return View(await BuildEditViewModel(model));
@@ -153,6 +154,7 @@ namespace IndustryX.WebUI.Controllers
             user.WarehouseId = model.WarehouseId;
 
             var (success, error) = await _userService.UpdateAsync(user, model.WarehouseId);
+
             if (!success)
             {
                 ShowAlert("Error", error!, "danger");
@@ -163,15 +165,17 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // -------------------- DELETE --------------------
         [HttpPost]
         public async Task<IActionResult> Delete(string id)
         {
             var (success, error) = await _userService.DeleteAsync(id);
+
             ShowAlert(success ? "Deleted" : "Error", success ? "User deleted." : error!, success ? "warning" : "danger");
             return RedirectToAction(nameof(Index));
         }
 
-        // Helpers
+        // -------------------- HELPERS --------------------
         private async Task<UserCreateViewModel> BuildCreateViewModel(UserCreateViewModel? model = null)
         {
             var viewModel = model ?? new UserCreateViewModel();

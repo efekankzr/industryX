@@ -15,18 +15,21 @@ namespace IndustryX.WebUI.Controllers
             _warehouseService = warehouseService;
         }
 
+        // ---------------------- LIST ----------------------
         public async Task<IActionResult> Index()
         {
             var warehouses = await _warehouseService.GetAllAsync();
             return View(warehouses);
         }
 
+        // --------------------- CREATE ---------------------
         public IActionResult Create() => View();
 
         [HttpPost]
         public async Task<IActionResult> Create(Warehouse warehouse)
         {
-            if (!ModelState.IsValid) return View(warehouse);
+            if (!ModelState.IsValid)
+                return View(warehouse);
 
             var (success, error) = await _warehouseService.AddWithInitialStocksAsync(warehouse);
             if (!success)
@@ -39,6 +42,7 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // ---------------------- EDIT ----------------------
         public async Task<IActionResult> Edit(int id)
         {
             var warehouse = await _warehouseService.GetByIdAsync(id);
@@ -54,7 +58,8 @@ namespace IndustryX.WebUI.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(Warehouse warehouse)
         {
-            if (!ModelState.IsValid) return View(warehouse);
+            if (!ModelState.IsValid)
+                return View(warehouse);
 
             var (success, error) = await _warehouseService.UpdateAsync(warehouse);
             if (!success)
@@ -67,6 +72,7 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // --------------------- DELETE ---------------------
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
@@ -79,9 +85,11 @@ namespace IndustryX.WebUI.Controllers
 
             await _warehouseService.DeleteAsync(id);
             ShowAlert("Deleted", "Warehouse deleted.", "warning");
+
             return RedirectToAction(nameof(Index));
         }
 
+        // ----------------- SET MAIN WAREHOUSE -----------------
         [HttpPost]
         public async Task<IActionResult> SetMainWarehouse(int warehouseId, string type)
         {
@@ -89,18 +97,9 @@ namespace IndustryX.WebUI.Controllers
 
             foreach (var warehouse in warehouses)
             {
-                switch (type)
-                {
-                    case "product":
-                        warehouse.IsMainForProduct = warehouse.Id == warehouseId;
-                        break;
-                    case "raw":
-                        warehouse.IsMainForRawMaterial = warehouse.Id == warehouseId;
-                        break;
-                    case "sales":
-                        warehouse.IsMainForSalesProduct = warehouse.Id == warehouseId;
-                        break;
-                }
+                warehouse.IsMainForProduct = type == "product" && warehouse.Id == warehouseId;
+                warehouse.IsMainForRawMaterial = type == "raw" && warehouse.Id == warehouseId;
+                warehouse.IsMainForSalesProduct = type == "sales" && warehouse.Id == warehouseId;
 
                 await _warehouseService.UpdateAsync(warehouse);
             }

@@ -52,17 +52,30 @@
                         </tbody>
                     </table>
 
-                    <div class="d-flex justify-content-between">
-                        <span class="fw-semibold">
-                            Payment:
-                            <span class="badge @(order.IsPaid ? "bg-success" : "bg-warning text-dark")">
-                                @(order.IsPaid ? "Paid" : "Pending")
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-semibold">
+                                Payment:
+                                <span class="badge @(order.IsPaid ? "bg-success" : "bg-warning text-dark")">
+                                    @(order.IsPaid ? "Paid" : "Pending")
+                                </span>
                             </span>
-                        </span>
+                        </div>
 
-                        <p class="fw-bold text-end fs-5">
-                            Total: @order.TotalPrice.ToString("C")
-                        </p>
+                        <div class="d-flex align-items-center gap-2">
+                            <p class="fw-bold mb-0 fs-5">
+                                Total: @order.TotalPrice.ToString("C")
+                            </p>
+
+                            @if (order.Status == IndustryX.Domain.Entities.OrderStatus.Pending)
+                            {
+                                <form asp-action="CancelOrder" asp-route-id="@order.Id" method="post" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-times-circle me-1"></i> Cancel Order
+                                    </button>
+                                </form>
+                            }
+                        </div>
                     </div>
                 </div>
             </div>

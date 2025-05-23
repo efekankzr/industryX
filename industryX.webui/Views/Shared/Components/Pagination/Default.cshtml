@@ -1,0 +1,45 @@
+﻿@model IndustryX.WebUI.ViewModels.PaginationViewModel
+
+<div class="d-flex justify-content-between align-items-center my-3">
+    <div>
+        <form method="get" asp-controller="@Model.ControllerName" asp-action="@Model.ActionName">
+            <label for="pageSize">Show:</label>
+            <select id="pageSize" name="pageSize" class="form-select d-inline-block w-auto"
+                    onchange="this.form.submit();">
+                @foreach (var size in Model.PageSizeOptions)
+                {
+                    <option value="@size" selected="@(Model.PageSize == size ? "selected" : null)">
+                        @size
+                    </option>
+                }
+
+                @foreach (var kvp in Model.RouteValues)
+                {
+                    if (!string.IsNullOrWhiteSpace(kvp.Value))
+                    {
+                        <input type="hidden" name="@kvp.Key" value="@kvp.Value" />
+                    }
+                }
+            </select>
+        </form>
+    </div>
+
+    <nav>
+        <ul class="pagination mb-0">
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                var route = new Dictionary<string, string?>(Model.RouteValues)
+                {
+                    ["page"] = i.ToString(),
+                    ["pageSize"] = Model.PageSize.ToString()
+                };
+
+                string url = Url.Action(Model.ActionName, Model.ControllerName, route);
+
+                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                    <a class="page-link" href="@url">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+</div>
