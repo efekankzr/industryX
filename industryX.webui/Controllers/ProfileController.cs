@@ -30,7 +30,6 @@ namespace IndustryX.WebUI.Controllers
         }
 
         // -------------------- Profile Info --------------------
-
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -68,8 +67,8 @@ namespace IndustryX.WebUI.Controllers
             return View(model);
         }
 
+        
         // -------------------- Change Password --------------------
-
         public IActionResult ChangePassword() => View(new ChangePasswordViewModel());
 
         [HttpPost]
@@ -93,8 +92,8 @@ namespace IndustryX.WebUI.Controllers
             return View(model);
         }
 
+        
         // -------------------- Addresses --------------------
-
         public async Task<IActionResult> Addresses()
         {
             var userId = _userManager.GetUserId(User);

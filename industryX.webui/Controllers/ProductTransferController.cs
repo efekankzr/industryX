@@ -115,6 +115,7 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction(nameof(Report));
         }
 
+        
         // ----------- WarehouseManager - Create & View -----------
 
         [Authorize(Roles = "WarehouseManager")]
@@ -169,6 +170,7 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        
         // ----------- Barcode Flow - Scan, Accept, Complete -----------
 
         [Authorize(Roles = "WarehouseManager, Driver")]
@@ -280,6 +282,7 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        
         // ----------- Helpers -----------
 
         private async Task<ProductTransferFormViewModel> CreateFormModelAsync(int? excludeWarehouseId = null, ProductTransferFormViewModel? model = null)

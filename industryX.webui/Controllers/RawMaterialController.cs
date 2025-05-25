@@ -22,6 +22,7 @@ namespace IndustryX.WebUI.Controllers
             return View(materials);
         }
 
+       
         // -------------------- Create --------------------
         public IActionResult Create() => View();
 
@@ -43,6 +44,7 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        
         // -------------------- Edit --------------------
         public async Task<IActionResult> Edit(int id)
         {
@@ -74,6 +76,7 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        
         // -------------------- Delete --------------------
         [HttpPost]
         public async Task<IActionResult> Delete(int id)

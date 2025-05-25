@@ -4,6 +4,13 @@ namespace IndustryX.Application.Interfaces
 {
     public interface IOrderService
     {
+        //Admin Dashboard Operations
+        Task<int> GetOrderCountByStatusAsync(OrderStatus status);
+        Task<decimal> GetTotalRevenueAsync();
+        Task<List<Order>> GetRecentOrdersAsync(int count);
+        Task<List<int>> GetWeeklySalesChartDataAsync();
+
+        //
         Task<(bool Success, string? Error)> CreateOrderFromCartAsync(string userId);
         Task<List<Order>> GetUserOrdersAsync(string userId);
         Task SaveOrderAsync(Order order);

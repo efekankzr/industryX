@@ -166,5 +166,15 @@ namespace IndustryX.Application.Services.Implementations
 
             await _productStockRepository.SaveAsync();
         }
+
+        public async Task<List<ProductStock>> GetCriticalStocksAsync()
+        {
+            return await _productStockRepository
+                .GetQueryable()
+                .Include(ps => ps.Product)
+                .Include(ps => ps.Warehouse)
+                .Where(ps => ps.Stock < ps.QruicalStock)
+                .ToListAsync();
+        }
     }
 }

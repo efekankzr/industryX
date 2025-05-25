@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IndustryX.WebUI.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public class UserController : BaseController
     {
         private readonly IUserService _userService;
@@ -25,6 +25,7 @@ namespace IndustryX.WebUI.Controllers
         }
 
         // -------------------- LIST USERS --------------------
+        [Authorize(Roles = "Admin,WarehouseManager,ProductionManager,SalesManager,Driver")]
         public async Task<IActionResult> Index()
         {
             var users = await _userService.GetAllAsync();
@@ -51,6 +52,7 @@ namespace IndustryX.WebUI.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = "Admin,SalesManager")]
         public async Task<IActionResult> CustomerList()
         {
             var users = await _userService.GetAllAsync();
@@ -76,13 +78,15 @@ namespace IndustryX.WebUI.Controllers
             return View(model);
         }
 
+        
         // -------------------- CREATE --------------------
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
             return View(await BuildCreateViewModel());
         }
 
-        [HttpPost]
+        [HttpPost, Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(UserCreateViewModel model)
         {
             if (!ModelState.IsValid)
@@ -110,7 +114,9 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        
         // -------------------- EDIT --------------------
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(string id)
         {
             var user = await _userService.GetByIdAsync(id);
@@ -134,7 +140,7 @@ namespace IndustryX.WebUI.Controllers
             return View(await BuildEditViewModel(model));
         }
 
-        [HttpPost]
+        [HttpPost, Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(UserEditViewModel model)
         {
             if (!ModelState.IsValid)
@@ -165,8 +171,9 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        
         // -------------------- DELETE --------------------
-        [HttpPost]
+        [HttpPost, Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(string id)
         {
             var (success, error) = await _userService.DeleteAsync(id);
@@ -175,6 +182,7 @@ namespace IndustryX.WebUI.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        
         // -------------------- HELPERS --------------------
         private async Task<UserCreateViewModel> BuildCreateViewModel(UserCreateViewModel? model = null)
         {

@@ -1,63 +1,193 @@
-﻿<div class="d-flex flex-column h-100 text-white bg-dark" style="width: 250px;">
+﻿@{
+    var fullName = ViewData["FullName"]?.ToString() ?? "Personel";
+}
 
-    <!-- Menü Scroll Alanı -->
-    <div class="flex-grow-1 overflow-auto px-3 py-2">
-        <ul class="nav nav-pills flex-column mb-auto">
+<div class="d-flex flex-column bg-dark text-white position-fixed vh-100" style="width: 250px;">
+    <!-- Brand -->
+    <div class="p-3 border-bottom">
+        <a asp-controller="Home" asp-action="Index" class="text-white text-decoration-none fs-5 fw-bold">
+            <i class="fas fa-cogs me-2"></i> IndustryX Admin
+        </a>
+    </div>
+
+    <!-- Navigation -->
+    <div class="flex-grow-1 overflow-auto px-3 pt-3">
+        <ul class="nav flex-column gap-2">
 
             <!-- DASHBOARD -->
-            <li class="nav-item mb-1">
-                <a asp-controller="Home" asp-action="RedirectDasboards" class="nav-link text-white">
+            <li class="nav-item">
+                <a class="nav-link text-white" asp-controller="Home" asp-action="RedirectDasboards">
                     <i class="fas fa-chart-line me-2"></i> Dashboard
                 </a>
             </li>
 
             <!-- INVENTORY -->
-            <li class="mb-2 text-uppercase small text-muted">Inventory</li>
-            <li><a asp-controller="Product" asp-action="Index" class="nav-link text-white"><i class="fas fa-box me-2"></i> Products</a></li>
-            <li><a asp-controller="RawMaterial" asp-action="Index" class="nav-link text-white"><i class="fas fa-cubes me-2"></i> Raw Materials</a></li>
-            <li><a asp-controller="Warehouse" asp-action="Index" class="nav-link text-white"><i class="fas fa-warehouse me-2"></i> Warehouses</a></li>
+            @if (User.IsInRole("Admin"))
+            {
+                <li class="text-uppercase small text-muted mt-4 mb-1">Inventory</li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" asp-controller="Product" asp-action="Index">
+                        <i class="fas fa-box me-2"></i> Products
+                    </a>
+                </li>                
+                <li class="nav-item">
+                    <a class="nav-link text-white" asp-controller="RawMaterial" asp-action="Index">
+                        <i class="fas fa-cubes me-2"></i> Raw Materials
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" asp-controller="Warehouse" asp-action="Index">
+                        <i class="fas fa-warehouse me-2"></i> Warehouses
+                    </a>
+                </li>
+            }
 
             <!-- STOCK -->
-            <li class="mt-3 mb-2 text-uppercase small text-muted">Stock</li>
-            <li><a asp-controller="RawMaterialStock" asp-action="Index" class="nav-link text-white"><i class="fas fa-layer-group me-2"></i> Raw Stock</a></li>
-            <li><a asp-controller="ProductStock" asp-action="Index" class="nav-link text-white"><i class="fas fa-boxes-stacked me-2"></i> Product Stock</a></li>
+            @if (User.IsInRole("Admin") || User.IsInRole("ProductionManager") || User.IsInRole("WarehouseManager"))
+            {
+                <li class="text-uppercase small text-muted mt-4 mb-1">Stock</li>
+                @if (User.IsInRole("Admin") || User.IsInRole("ProductionManager"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="RawMaterialStock" asp-action="Index">
+                            <i class="fas fa-layer-group me-2"></i> Raw Stock
+                        </a>
+                    </li>
+                }
+                @if (User.IsInRole("Admin") || User.IsInRole("WarehouseManager"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="ProductStock" asp-action="Index">
+                            <i class="fas fa-boxes-stacked me-2"></i> Product Stock
+                        </a>
+                    </li>
+                }
+            }
 
             <!-- PRODUCTION -->
-            <li class="mt-3 mb-2 text-uppercase small text-muted">Production</li>
-            <li><a asp-controller="Production" asp-action="Index" class="nav-link text-white"><i class="fas fa-industry me-2"></i> Overview</a></li>
-            <li><a asp-controller="Production" asp-action="Create" class="nav-link text-white"><i class="fas fa-plus-circle me-2"></i> New Production</a></li>
+            @if (User.IsInRole("Admin") || User.IsInRole("ProductionManager"))
+            {
+                <li class="text-uppercase small text-muted mt-4 mb-1">Production</li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" asp-controller="Production" asp-action="Index">
+                        <i class="fas fa-industry me-2"></i> Overview
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" asp-controller="Production" asp-action="Create">
+                        <i class="fas fa-plus-circle me-2"></i> New Production
+                    </a>
+                </li>
+            }
 
             <!-- TRANSFERS -->
-            <li class="mt-3 mb-2 text-uppercase small text-muted">Transfers</li>
-            <li><a asp-controller="ProductTransfer" asp-action="Index" class="nav-link text-white"><i class="fas fa-truck me-2"></i> Transfers</a></li>
-            <li><a asp-controller="ProductTransfer" asp-action="ScanTransfer" class="nav-link text-white"><i class="fas fa-barcode me-2"></i> Scan</a></li>
-            <li><a asp-controller="ProductTransfer" asp-action="Report" class="nav-link text-white"><i class="fas fa-file-alt me-2"></i> Reports</a></li>
+            @if (User.IsInRole("Admin") || User.IsInRole("WarehouseManager") || User.IsInRole("Driver"))
+            {
+                <li class="text-uppercase small text-muted mt-4 mb-1">Transfers</li>
+
+                @if (User.IsInRole("WarehouseManager") || User.IsInRole("Driver"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="ProductTransfer" asp-action="Index">
+                            <i class="fas fa-truck me-2"></i> Transfers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="ProductTransfer" asp-action="ScanTransfer">
+                            <i class="fas fa-barcode me-2"></i> Scan Transfer
+                        </a>
+                    </li>
+                }
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="ProductTransfer" asp-action="Report">
+                            <i class="fas fa-file-alt me-2"></i> Reports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="ProductTransfer" asp-action="DirectTransfer">
+                            <i class="fas fa-plus me-2"></i> Create Transfer
+                        </a>
+                    </li>
+                }
+            }
 
             <!-- SALES -->
-            <li class="mt-3 mb-2 text-uppercase small text-muted">Sales</li>
-            <li><a asp-controller="SalesProduct" asp-action="Index" class="nav-link text-white"><i class="fas fa-store me-2"></i> Products</a></li>
-            <li><a asp-controller="Category" asp-action="Index" class="nav-link text-white"><i class="fas fa-tags me-2"></i> Categories</a></li>
-            <li><a asp-controller="Order" asp-action="Index" class="nav-link text-white"><i class="fas fa-receipt me-2"></i> Orders</a></li>
+            @if (User.IsInRole("Admin") || User.IsInRole("SalesManager"))
+            {
+                <li class="text-uppercase small text-muted mt-4 mb-1">Sales</li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" asp-controller="SalesProduct" asp-action="Index">
+                        <i class="fas fa-store me-2"></i> Sales Products
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" asp-controller="Category" asp-action="Index">
+                        <i class="fas fa-tags me-2"></i> Categories
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" asp-controller="Order" asp-action="Index">
+                        <i class="fas fa-receipt me-2"></i> Orders
+                    </a>
+                </li>
+            }
 
             <!-- USERS -->
-            <li class="mt-3 mb-2 text-uppercase small text-muted">Users</li>
-            <li><a asp-controller="User" asp-action="Index" class="nav-link text-white"><i class="fas fa-users me-2"></i> Personnel</a></li>
-            <li><a asp-controller="User" asp-action="CustomerList" class="nav-link text-white"><i class="fas fa-user-friends me-2"></i> Customers</a></li>
+            @if (User.IsInRole("Admin") || User.IsInRole("SalesManager") || User.IsInRole("Driver") || User.IsInRole("ProductionManager") || User.IsInRole("WarehouseManager"))
+            {
+                <li class="text-uppercase small text-muted mt-4 mb-1">Users</li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" asp-controller="User" asp-action="Index">
+                        <i class="fas fa-users me-2"></i> Personnel
+                    </a>
+                </li>
+                @if (User.IsInRole("Admin") || User.IsInRole("SalesManager"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="User" asp-action="CustomerList">
+                            <i class="fas fa-user-friends me-2"></i> Customers
+                        </a>
+                    </li>
+                }
+                @if (User.IsInRole("Admin"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="User" asp-action="Create">
+                            <i class="fas fa-user-plus me-2"></i> Add Personnel
+                        </a>
+                    </li>
+                }
+            }
 
             <!-- SETTINGS -->
-            <li class="mt-3 mb-2 text-uppercase small text-muted">Settings</li>
-            <li><a asp-controller="GeneralSettings" asp-action="ListLabor" class="nav-link text-white"><i class="fas fa-gear me-2"></i> Labor Cost</a></li>
-            <li><a asp-controller="AdminMedia" asp-action="Upload" class="nav-link text-white"><i class="fas fa-image me-2"></i> Homepage Images</a></li>
+            @if (User.IsInRole("Admin") || User.IsInRole("SalesManager"))
+            {
+                <li class="text-uppercase small text-muted mt-4 mb-1">Settings</li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" asp-controller="AdminMedia" asp-action="Upload">
+                        <i class="fas fa-image me-2"></i> Homepage Images
+                    </a>
+                </li>
+                @if (User.IsInRole("Admin"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-white" asp-controller="GeneralSettings" asp-action="ListLabor">
+                            <i class="fas fa-gear me-2"></i> Labor Cost
+                        </a>
+                    </li>
+                }
+            }
         </ul>
     </div>
 
-    <!-- Çıkış Butonu (Sabit) -->
-    <div class="border-top border-secondary p-3">
-        <div class="d-flex align-items-center mb-3">
-            <i class="fas fa-user-circle me-2 fs-5"></i>
-            <div class="text-truncate">
-                <strong>x</strong>
-            </div>
+    <!-- User Info + Logout -->
+    <div class="border-top p-3 mt-auto">
+        <div class="d-flex align-items-center mb-2">
+            <i class="fas fa-user-circle me-2"></i>
+            <span class="text-white small">@fullName</span>
         </div>
         <form asp-controller="Account" asp-action="Logout" method="post">
             <button type="submit" class="btn btn-sm btn-outline-light w-100 text-start">

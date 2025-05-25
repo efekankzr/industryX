@@ -1,6 +1,7 @@
 ﻿using IndustryX.Application.Interfaces;
 using IndustryX.Domain.Entities;
 using IndustryX.Domain.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace IndustryX.Application.Services
 {
@@ -77,6 +78,16 @@ namespace IndustryX.Application.Services
                 _repository.Delete(entity);
                 await _repository.SaveAsync();
             }
+        }
+
+        public async Task<List<RawMaterialStock>> GetCriticalStocksAsync()
+        {
+            return await _rawMaterialStockRepository
+                .GetQueryable()
+                .Include(rs => rs.RawMaterial)
+                .Include(rs => rs.Warehouse)
+                .Where(rs => rs.Stock < rs.QruicalStock)
+                .ToListAsync();
         }
     }
 }

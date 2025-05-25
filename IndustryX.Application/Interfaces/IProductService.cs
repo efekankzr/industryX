@@ -4,6 +4,7 @@ namespace IndustryX.Application.Interfaces
 {
     public interface IProductService
     {
+        Task<List<ProductStock>> GetCriticalStocksAsync();
         Task<IEnumerable<Product>> GetAllAsync();
         Task<Product?> GetByIdAsync(int id);
         Task<(bool Success, string? ErrorMessage)> CreateAsync(Product product);

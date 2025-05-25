@@ -5,6 +5,11 @@ body {
     padding: 0;
 }
 
+main {
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+}
+
 .main-content {
     background-color: #f8f9fa;
     min-height: 100vh;
@@ -16,4 +21,31 @@ tr.critical-low {
 
 .table th i {
     margin-right: 4px;
+}
+
+.hover-primary:hover {
+    color: #0d6efd !important;
+    transition: color 0.2s ease-in-out;
+}
+
+/* Navbarýn geniþliðini layoutta referans alabilmek için */
+.ms-250 {
+    margin-left: 250px;
+}
+
+/* Sidebar scroll varsa güzel kaydýrma için */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(255,255,255,0.2);
+    border-radius: 4px;
+}
+
+.nav-link.active,
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
 }

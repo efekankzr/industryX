@@ -1,4 +1,5 @@
 ﻿using IndustryX.Application.Interfaces;
+using IndustryX.Domain.Entities;
 using IndustryX.WebUI.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,8 @@ namespace IndustryX.WebUI.Controllers
         private readonly ISalesProductService _salesProductService;
         private readonly IUserService _userService;
         private readonly ICategoryService _categoryService;
+        private readonly IProductionService _productionService;
+        private readonly IOrderService _orderService;
 
         public HomeController(
             IWarehouseService warehouseService,
@@ -24,7 +27,9 @@ namespace IndustryX.WebUI.Controllers
             IProductTransferService productTransferService,
             ISalesProductService salesProductService,
             IUserService userService,
-            ICategoryService categoryService)
+            ICategoryService categoryService,
+            IProductionService productionService,
+            IOrderService orderService)
         {
             _warehouseService = warehouseService;
             _productService = productService;
@@ -34,10 +39,12 @@ namespace IndustryX.WebUI.Controllers
             _salesProductService = salesProductService;
             _userService = userService;
             _categoryService = categoryService;
+            _productionService = productionService;
+            _orderService = orderService;
         }
 
         // -------------------------------
-        // Homepage for Visitors & Users
+        // Homepage for Visitors & Customers
         // -------------------------------
         [AllowAnonymous]
         public async Task<IActionResult> Index()
@@ -48,43 +55,40 @@ namespace IndustryX.WebUI.Controllers
             var bestSellers = await _salesProductService.GetBestSellersAsync();
             var populars = await _salesProductService.GetPopularAsync();
 
-            var bestSellerModels = bestSellers.Select(p => new ProductCardViewModel
-            {
-                Product = new SalesProductListItemViewModel
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Price = p.SalePrice,
-                    Url = p.Url,
-                    ImagePath = p.Images.FirstOrDefault()?.ImagePath
-                },
-                IsWishlist = false
-            }).ToList();
-
-            var popularModels = populars.Select(p => new ProductCardViewModel
-            {
-                Product = new SalesProductListItemViewModel
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    Price = p.SalePrice,
-                    Url = p.Url,
-                    ImagePath = p.Images.FirstOrDefault()?.ImagePath
-                },
-                IsWishlist = false
-            }).ToList();
-
             var model = new HomePageViewModel
             {
-                BestSellers = bestSellerModels,
-                PopularProducts = popularModels
+                BestSellers = bestSellers.Select(p => new ProductCardViewModel
+                {
+                    Product = new SalesProductListItemViewModel
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Price = p.SalePrice,
+                        Url = p.Url,
+                        ImagePath = p.Images.FirstOrDefault()?.ImagePath
+                    },
+                    IsWishlist = false
+                }).ToList(),
+
+                PopularProducts = populars.Select(p => new ProductCardViewModel
+                {
+                    Product = new SalesProductListItemViewModel
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Price = p.SalePrice,
+                        Url = p.Url,
+                        ImagePath = p.Images.FirstOrDefault()?.ImagePath
+                    },
+                    IsWishlist = false
+                }).ToList()
             };
 
             return View(model);
         }
 
         // -------------------------------
-        // Redirect to Role-Based Dashboards
+        // Role-Based Dashboard Redirection
         // -------------------------------
         public async Task<IActionResult> RedirectDasboards()
         {
@@ -96,20 +100,16 @@ namespace IndustryX.WebUI.Controllers
                 return RedirectToAction(nameof(AdminDashboard));
             }
 
-            if (User.IsInRole("Driver"))
-                return RedirectToAction(nameof(DriverDashboard));
-
-            if (User.IsInRole("WarehouseManager"))
-                return RedirectToAction(nameof(WarehouseManagerDashboard));
-
-            if (User.IsInRole("ProductionManager"))
-                return RedirectToAction(nameof(ProductionManagerDashboard));
+            if (User.IsInRole("Driver")) return RedirectToAction(nameof(DriverDashboard));
+            if (User.IsInRole("WarehouseManager")) return RedirectToAction(nameof(WarehouseManagerDashboard));
+            if (User.IsInRole("ProductionManager")) return RedirectToAction(nameof(ProductionManagerDashboard));
+            if (User.IsInRole("SalesManager")) return RedirectToAction(nameof(SalesManagerDashboard));
 
             return Forbid();
         }
 
         // -------------------------------
-        // Admin Dashboards
+        // Admin Dashboard
         // -------------------------------
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> SetupDashboard()
@@ -119,7 +119,65 @@ namespace IndustryX.WebUI.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public IActionResult AdminDashboard() => View();
+        public async Task<IActionResult> AdminDashboard()
+        {
+            var model = await GetSetupStatusAsync();
+
+            model.TotalProducts = (await _productService.GetAllAsync()).Count();
+            model.TotalUsers = (await _userService.GetAllAsync()).Count();
+            model.PendingOrders = await _orderService.GetOrderCountByStatusAsync(OrderStatus.Pending);
+            model.TotalRevenue = await _orderService.GetTotalRevenueAsync();
+
+            var recentOrders = await _orderService.GetRecentOrdersAsync(5);
+            model.RecentOrders = recentOrders.Select(o => new RecentOrderViewModel
+            {
+                Id = o.Id,
+                CustomerName = o.User.Firstname,
+                TotalPrice = o.TotalPrice,
+                Status = o.Status.ToString(),
+                CreatedAt = o.CreatedAt
+            }).ToList();
+
+            model.SalesChartData = await _orderService.GetWeeklySalesChartDataAsync();
+
+            model.CriticalProductStocks = (await _productService.GetCriticalStocksAsync()).Select(ps => new StockAlertItem
+            {
+                Name = ps.Product.Name,
+                Stock = ps.Stock,
+                CriticalStock = ps.QruicalStock,
+                Type = "Product"
+            }).ToList();
+
+            model.CriticalRawMaterialStocks = (await _rawMaterialService.GetCriticalStocksAsync()).Select(rs => new StockAlertItem
+            {
+                Name = rs.RawMaterial.Name,
+                Stock = (int)rs.Stock,
+                CriticalStock = (int)rs.QruicalStock,
+                Type = "RawMaterial"
+            }).ToList();
+
+            var productions = await _productionService.GetAllAsync();
+
+            model.TodaysProductions = productions
+                .Where(p => p.StartTime?.Date == DateTime.Today)
+                .Select(p => new ProductionPlanItem
+                {
+                    ProductName = p.Product.Name,
+                    BoxQuantity = p.BoxQuantity,
+                    StartTime = p.StartTime ?? DateTime.Today
+                }).ToList();
+
+            model.TomorrowsProductions = productions
+                .Where(p => p.StartTime?.Date == DateTime.Today.AddDays(1))
+                .Select(p => new ProductionPlanItem
+                {
+                    ProductName = p.Product.Name,
+                    BoxQuantity = p.BoxQuantity,
+                    StartTime = p.StartTime ?? DateTime.Today.AddDays(1)
+                }).ToList();
+
+            return View(model);
+        }
 
         // -------------------------------
         // Role-Specific Dashboards
@@ -145,7 +203,7 @@ namespace IndustryX.WebUI.Controllers
         public IActionResult SalesManagerDashboard() => View();
 
         // -------------------------------
-        // Setup Check Logic
+        // Setup Status Check
         // -------------------------------
         private async Task<AdminDashboardViewModel> GetSetupStatusAsync()
         {
@@ -167,7 +225,6 @@ namespace IndustryX.WebUI.Controllers
             };
 
             var roles = new[] { "SalesManager", "WarehouseManager", "ProductionManager", "Driver" };
-
             foreach (var role in roles)
             {
                 var usersInRole = await _userService.GetByRoleAsync(role);
@@ -181,7 +238,6 @@ namespace IndustryX.WebUI.Controllers
         {
             var warehouses = await _warehouseService.GetAllAsync();
             var managers = await _userService.GetByRoleAsync("WarehouseManager");
-
             return warehouses.All(w => managers.Any(m => m.WarehouseId == w.Id));
         }
     }

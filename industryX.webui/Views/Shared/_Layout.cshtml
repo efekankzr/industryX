@@ -1,12 +1,18 @@
-﻿@inject SignInManager<ApplicationUser> SignInManager
-@inject UserManager<ApplicationUser> UserManager
+﻿@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
 
 @{
-    var user = SignInManager.IsSignedIn(User) ? await UserManager.GetUserAsync(User) : null;
-    var roles = user != null ? await UserManager.GetRolesAsync(user) : new List<string>();
-    bool isAdminPanelUser = roles.Any(r =>
-        r == "Admin" || r == "WarehouseManager" || r == "Driver" || r == "SalesManager" || r == "ProductionManager");
+    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+    var isCustomer = User.IsInRole("Customer");
+    var isAdmin = User.IsInRole("Admin") || User.IsInRole("SalesManager") || User.IsInRole("Driver") || User.IsInRole("ProductionManager");
+
+    if (SignInManager.IsSignedIn(User))
+    {
+        var currentUser = await UserManager.GetUserAsync(User);
+        ViewData["FullName"] = $"{currentUser?.Firstname} {currentUser?.Surname}";
+    }
 }
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,52 +25,27 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/datatables.net-bs5/css/dataTables.bootstrap5.css" />
     <link rel="stylesheet" href="~/css/site.css" />
-    <style>
-        .admin-wrapper {
-            display: flex;
-        }
-
-        .admin-sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 250px;
-            background-color: #343a40;
-            z-index: 1030;
-        }
-
-        .admin-content {
-            margin-left: 250px;
-            width: calc(100% - 250px);
-            padding: 2rem;
-            overflow-y: auto;
-            min-height: 100vh;
-            background-color: #f8f9fa;
-        }
-    </style>
 </head>
-<body class="bg-light">
-    @if (isAdminPanelUser)
+<body>
+
+    @if (!isAuthenticated || isCustomer)
     {
-        <div class="admin-wrapper d-none d-md-flex">
-            <div class="admin-sidebar">
-                @await Html.PartialAsync("_AdminNavbar", user, new ViewDataDictionary(ViewData))
-            </div>
-            <div class="admin-content">
-                <main role="main">
-                    @RenderBody()
-                </main>
-                @await Html.PartialAsync("_AlertPartial")
-            </div>
-        </div>
-    }
-    else
-    {
-        @await Html.PartialAsync("_SalesNavbar", user)
+        <!-- SALES LAYOUT -->
+        @await Html.PartialAsync("_SalesNavbar")
 
         <div class="container mt-4">
             <main role="main">
+                @RenderBody()
+            </main>
+            @await Html.PartialAsync("_AlertPartial")
+        </div>
+    }
+    else if (isAdmin)
+    {
+        @await Html.PartialAsync("_AdminNavbar")
+
+        <div class="ms-250 ps-4 pt-4" style="margin-left: 250px;">
+            <main>
                 @RenderBody()
             </main>
             @await Html.PartialAsync("_AlertPartial")

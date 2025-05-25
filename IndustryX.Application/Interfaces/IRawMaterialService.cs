@@ -4,6 +4,7 @@ namespace IndustryX.Application.Interfaces
 {
     public interface IRawMaterialService
     {
+        Task<List<RawMaterialStock>> GetCriticalStocksAsync();
         Task<IEnumerable<RawMaterial>> GetAllAsync();
         Task<RawMaterial?> GetByIdAsync(int id);
         Task<(bool Success, string? ErrorMessage)> AddAsync(RawMaterial material);
