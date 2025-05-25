@@ -58,7 +58,6 @@ namespace IndustryX.Application.Services
             await _salesProductStockRepository.SaveAsync();
         }
 
-
         public async Task<SalesProduct?> GetByIdAsync(int id)
         {
             return await _salesProductRepository
@@ -125,6 +124,22 @@ namespace IndustryX.Application.Services
                 .Include(p => p.SalesProductCategories)
                     .ThenInclude(spc => spc.Category)
                 .FirstOrDefaultAsync(p => p.Url == url && p.IsActive);
+        }
+
+        public async Task<List<SalesProduct>> GetBestSellersAsync()
+        {
+            return await _salesProductRepository.GetQueryable()
+                .Include(p => p.Images)
+                .Where(p => p.IsActive && p.IsBestSeller)
+                .ToListAsync();
+        }
+
+        public async Task<List<SalesProduct>> GetPopularAsync()
+        {
+            return await _salesProductRepository.GetQueryable()
+                .Include(p => p.Images)
+                .Where(p => p.IsActive && p.IsPopular)
+                .ToListAsync();
         }
     }
 }

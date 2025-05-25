@@ -139,6 +139,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FastPngEncoderSharp" Version="2.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.13" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.13">
       <PrivateAssets>all</PrivateAssets>
@@ -150,6 +151,10 @@
     <ProjectReference Include="..\IndustryX.Application\IndustryX.Application.csproj" />
     <ProjectReference Include="..\IndustryX.Infrastructure\IndustryX.Infrastructure.csproj" />
     <ProjectReference Include="..\IndustryX.Persistence\IndustryX.Persistence.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\images\sections\" />
   </ItemGroup>
 
 </Project>

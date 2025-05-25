@@ -16,7 +16,7 @@
             </a>
         }
 
-        @* PRODUCT MANAGEMENT *@
+        @* INVENTORY MANAGEMENT *@
         @if (User.IsInRole("Admin"))
         {
             <p class="nav_section">Inventory</p>
@@ -35,20 +35,24 @@
         }
 
         @* STOCK MANAGEMENT *@
-        @if (User.IsInRole("Admin") || User.IsInRole("ProductionManager"))
+        @if (User.IsInRole("Admin") || User.IsInRole("ProductionManager") || User.IsInRole("WarehouseManager"))
         {
             <p class="nav_section">Stock</p>
-            <a asp-controller="RawMaterialStock" asp-action="Index" class="nav_link">
-                <i class="fa-solid fa-layer-group nav_icon"></i>
-                <span class="nav_name">Raw Material Stock</span>
-            </a>
-        }
-        @if (User.IsInRole("Admin") || User.IsInRole("WarehouseManager"))
-        {
-            <a asp-controller="ProductStock" asp-action="Index" class="nav_link">
-                <i class="fa-solid fa-boxes-stacked nav_icon"></i>
-                <span class="nav_name">Product Stock</span>
-            </a>
+
+            @if (User.IsInRole("Admin") || User.IsInRole("ProductionManager"))
+            {
+                <a asp-controller="RawMaterialStock" asp-action="Index" class="nav_link">
+                    <i class="fa-solid fa-layer-group nav_icon"></i>
+                    <span class="nav_name">Raw Material Stock</span>
+                </a>
+            }
+            @if (User.IsInRole("Admin") || User.IsInRole("WarehouseManager"))
+            {
+                <a asp-controller="ProductStock" asp-action="Index" class="nav_link">
+                    <i class="fa-solid fa-boxes-stacked nav_icon"></i>
+                    <span class="nav_name">Product Stock</span>
+                </a>
+            }
         }
 
         @* PRODUCTION *@
@@ -66,7 +70,7 @@
         }
 
         @* PRODUCT TRANSFER *@
-        @if (User.IsInRole("WarehouseManager") || User.IsInRole("Driver") || User.IsInRole("Admin"))
+        @if (User.IsInRole("Admin") || User.IsInRole("Driver") || User.IsInRole("WarehouseManager"))
         {
             <p class="nav_section">Transfers</p>
             @if (User.IsInRole("WarehouseManager"))
@@ -110,6 +114,16 @@
             </a>
         }
 
+        @* ORDERS *@
+        @if (User.IsInRole("Admin") || User.IsInRole("SalesManager"))
+        {
+            <p class="nav_section">Orders</p>
+            <a asp-controller="Order" asp-action="Index" class="nav_link">
+                <i class="fa-solid fa-store nav_icon"></i>
+                <span class="nav_name">Orders</span>
+            </a>
+        }
+
         @* USERS *@
         @if (User.IsInRole("Admin") || User.IsInRole("ProductionManager") || User.IsInRole("Driver") || User.IsInRole("WarehouseManager") || User.IsInRole("SalesManager"))
         {
@@ -119,7 +133,7 @@
                 <span class="nav_name">Personnel</span>
             </a>
             @if (User.IsInRole("Admin"))
-            {                
+            {
                 <a asp-controller="User" asp-action="Create" class="nav_link">
                     <i class="fa-solid fa-user-plus nav_icon"></i>
                     <span class="nav_name">Add Personnel</span>
@@ -130,7 +144,7 @@
                 <a asp-controller="User" asp-action="CustomerList" class="nav_link">
                     <i class="fa-solid fa-user-group nav_icon"></i>
                     <span class="nav_name">Customers</span>
-                </a>                
+                </a>
             }
         }
 
@@ -141,6 +155,10 @@
             <a asp-controller="GeneralSettings" asp-action="ListLabor" class="nav_link">
                 <i class="fa-solid fa-gear nav_icon"></i>
                 <span class="nav_name">Labor Costs</span>
+            </a>
+            <a asp-controller="AdminMedia" asp-action="Upload" class="nav_link">
+                <i class="fa-solid fa-image nav_icon"></i>
+                <span class="nav_name">Homepage Images</span>
             </a>
         }
     </div>

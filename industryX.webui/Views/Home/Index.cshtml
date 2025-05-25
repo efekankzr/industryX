@@ -1,27 +1,146 @@
-﻿@model List<IndustryX.WebUI.ViewModels.ProductCardViewModel>
+﻿@model IndustryX.WebUI.ViewModels.HomePageViewModel
 
 @{
     ViewData["Title"] = "Shop";
 }
 
-<div class="my-4">
-    <h2 class="text-center text-primary mb-4">
-        <i class="fas fa-store"></i> Our Products
-    </h2>
+<!-- 🔹 Banner Carousel -->
+<div id="homepageBanner" class="carousel slide mb-5" data-bs-ride="carousel">
+    <div class="carousel-inner rounded-4 shadow-sm">
+        <div class="carousel-item active">
+            <img src="/images/banners/banner1.jpg" class="d-block w-100" style="max-height: 400px; object-fit: cover;" alt="Banner 1">
+        </div>
+        <div class="carousel-item">
+            <img src="/images/banners/banner2.jpg" class="d-block w-100" style="max-height: 400px; object-fit: cover;" alt="Banner 2">
+        </div>
+        <div class="carousel-item">
+            <img src="/images/banners/banner3.jpg" class="d-block w-100" style="max-height: 400px; object-fit: cover;" alt="Banner 3">
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#homepageBanner" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#homepageBanner" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+</div>
 
-    @if (!Model.Any())
+<!-- 🔹 Category Images (3x2) -->
+<div class="container mb-5">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <a href="/shop/bestsellers">
+                <img src="/images/sections/bestseller.jpg" class="img-fluid rounded-3 shadow-sm" style="width: 100%; aspect-ratio: 3/2; object-fit: cover;" alt="Bestsellers" />
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="/shop/popular">
+                <img src="/images/sections/popular.jpg" class="img-fluid rounded-3 shadow-sm" style="width: 100%; aspect-ratio: 3/2; object-fit: cover;" alt="Popular" />
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="/shop/new">
+                <img src="/images/sections/new.jpg" class="img-fluid rounded-3 shadow-sm" style="width: 100%; aspect-ratio: 3/2; object-fit: cover;" alt="New Arrivals" />
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="/shop/sale">
+                <img src="/images/sections/sale.jpg" class="img-fluid rounded-3 shadow-sm" style="width: 100%; aspect-ratio: 3/2; object-fit: cover;" alt="On Sale" />
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="/shop/featured">
+                <img src="/images/sections/featured.jpg" class="img-fluid rounded-3 shadow-sm" style="width: 100%; aspect-ratio: 3/2; object-fit: cover;" alt="Featured" />
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="/shop/limited">
+                <img src="/images/sections/limited.jpg" class="img-fluid rounded-3 shadow-sm" style="width: 100%; aspect-ratio: 3/2; object-fit: cover;" alt="Limited Stock" />
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- 🔹 Best Sellers Carousel -->
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-danger m-0">
+            <i class="fas fa-fire"></i> Best Sellers
+        </h2>
+        <div>
+            <button class="btn btn-sm btn-outline-secondary me-2" onclick="scrollCarousel('bestseller-carousel', -1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="scrollCarousel('bestseller-carousel', 1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    @if (!Model.BestSellers.Any())
     {
-        <div class="alert alert-info text-center">No products available for sale at the moment.</div>
+        <div class="alert alert-warning text-center">No best seller products available.</div>
     }
     else
     {
-        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
-            @foreach (var productCard in Model)
-            {
-                <div class="col">
-                    @await Component.InvokeAsync("ProductCard", productCard)
-                </div>
-            }
+        <div class="overflow-hidden">
+            <div class="d-flex flex-nowrap gap-3 scroll-carousel" id="bestseller-carousel">
+                @foreach (var item in Model.BestSellers)
+                {
+                    <div class="flex-shrink-0" style="width: 33.3333%;">
+                        @await Component.InvokeAsync("ProductCard", item)
+                    </div>
+                }
+            </div>
         </div>
     }
-</div>
+</section>
+
+<!-- 🔹 Popular Products Carousel -->
+<section class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-primary m-0">
+            <i class="fas fa-thumbs-up"></i> Popular Products
+        </h2>
+        <div>
+            <button class="btn btn-sm btn-outline-secondary me-2" onclick="scrollCarousel('popular-carousel', -1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="scrollCarousel('popular-carousel', 1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    @if (!Model.PopularProducts.Any())
+    {
+        <div class="alert alert-info text-center">No popular products found.</div>
+    }
+    else
+    {
+        <div class="overflow-hidden">
+            <div class="d-flex flex-nowrap gap-3 scroll-carousel" id="popular-carousel">
+                @foreach (var item in Model.PopularProducts)
+                {
+                    <div class="flex-shrink-0" style="width: 33.3333%;">
+                        @await Component.InvokeAsync("ProductCard", item)
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</section>
+
+@section Scripts {
+    <script>
+        function scrollCarousel(id, direction) {
+            const el = document.getElementById(id);
+            const scrollAmount = el.offsetWidth / 3; // 1 ürün genişliği kadar
+            el.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+        }
+
+        // Otomatik kaydırma (her 30 saniyede 1 ürün)
+        setInterval(() => scrollCarousel('bestseller-carousel', 1), 30000);
+        setInterval(() => scrollCarousel('popular-carousel', 1), 30000);
+    </script>
+}

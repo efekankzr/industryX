@@ -12,5 +12,7 @@ namespace IndustryX.Application.Interfaces
         Task<List<SalesProduct>> GetActiveListAsync();
         Task<SalesProduct?> GetByUrlAsync(string url);
         Task InitializeSalesProductStocksAsync(int salesProductId);
+        Task<List<SalesProduct>> GetBestSellersAsync();
+        Task<List<SalesProduct>> GetPopularAsync();
     }
 }

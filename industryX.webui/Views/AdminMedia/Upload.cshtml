@@ -1,0 +1,75 @@
+﻿@{
+    ViewData["Title"] = "Upload Homepage Images";
+    var bannerOptions = ViewBag.BannerOptions as List<string> ?? new();
+    var sectionOptions = ViewBag.SectionOptions as List<string> ?? new();
+}
+
+<div class="container my-5">
+    <h2 class="text-center mb-4 text-primary">
+        <i class="fas fa-upload me-2"></i> Upload Homepage Images
+    </h2>
+
+    <div class="row g-5">
+        <!-- 🔹 Banner Upload -->
+        <div class="col-md-6">
+            <div class="card shadow-sm rounded-4">
+                <div class="card-body">
+                    <h5 class="card-title text-danger mb-3"><i class="fas fa-image me-2"></i> Upload Banner</h5>
+                    <form asp-action="UploadBanner" method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Choose File</label>
+                            <input type="file" name="file" class="form-control" accept="image/*" required />
+                            <small class="text-muted">Recommended size: <strong>1200x400</strong> (JPG/PNG)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Select Banner Position</label>
+                            <select name="fileName" class="form-select" required>
+                                <option disabled selected>Select a banner...</option>
+                                @foreach (var option in bannerOptions)
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-danger w-100">
+                            <i class="fas fa-upload me-1"></i> Upload Banner
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🔹 Section Upload -->
+        <div class="col-md-6">
+            <div class="card shadow-sm rounded-4">
+                <div class="card-body">
+                    <h5 class="card-title text-success mb-3"><i class="fas fa-th-large me-2"></i> Upload Section Image</h5>
+                    <form asp-action="UploadSection" method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Choose File</label>
+                            <input type="file" name="file" class="form-control" accept="image/*" required />
+                            <small class="text-muted">Recommended size: <strong>600x400</strong> (JPG/PNG)</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Select Section Slot</label>
+                            <select name="fileName" class="form-select" required>
+                                <option disabled selected>Select a section image...</option>
+                                @foreach (var option in sectionOptions)
+                                {
+                                    <option value="@option">@option</option>
+                                }
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-upload me-1"></i> Upload Section
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

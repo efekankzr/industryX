@@ -45,9 +45,10 @@ namespace IndustryX.WebUI.Controllers
             if (User.Identity?.IsAuthenticated == true && !User.IsInRole("Customer"))
                 return await RedirectDasboards();
 
-            var salesProducts = await _salesProductService.GetActiveListAsync();
+            var bestSellers = await _salesProductService.GetBestSellersAsync();
+            var populars = await _salesProductService.GetPopularAsync();
 
-            var model = salesProducts.Select(p => new ProductCardViewModel
+            var bestSellerModels = bestSellers.Select(p => new ProductCardViewModel
             {
                 Product = new SalesProductListItemViewModel
                 {
@@ -59,6 +60,25 @@ namespace IndustryX.WebUI.Controllers
                 },
                 IsWishlist = false
             }).ToList();
+
+            var popularModels = populars.Select(p => new ProductCardViewModel
+            {
+                Product = new SalesProductListItemViewModel
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Price = p.SalePrice,
+                    Url = p.Url,
+                    ImagePath = p.Images.FirstOrDefault()?.ImagePath
+                },
+                IsWishlist = false
+            }).ToList();
+
+            var model = new HomePageViewModel
+            {
+                BestSellers = bestSellerModels,
+                PopularProducts = popularModels
+            };
 
             return View(model);
         }
