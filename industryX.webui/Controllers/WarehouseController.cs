@@ -93,17 +93,7 @@ namespace IndustryX.WebUI.Controllers
         [HttpPost]
         public async Task<IActionResult> SetMainWarehouse(int warehouseId, string type)
         {
-            var warehouses = await _warehouseService.GetAllAsync();
-
-            foreach (var warehouse in warehouses)
-            {
-                warehouse.IsMainForProduct = type == "product" && warehouse.Id == warehouseId;
-                warehouse.IsMainForRawMaterial = type == "raw" && warehouse.Id == warehouseId;
-                warehouse.IsMainForSalesProduct = type == "sales" && warehouse.Id == warehouseId;
-
-                await _warehouseService.UpdateAsync(warehouse);
-            }
-
+            await _warehouseService.SetMainWarehouseAsync(warehouseId, type);
             return Ok();
         }
     }

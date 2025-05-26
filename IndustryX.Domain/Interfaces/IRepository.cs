@@ -8,6 +8,7 @@ namespace IndustryX.Domain.Interfaces
         Task<IEnumerable<T>> GetAllAsync();
         Task AddAsync(T entity);
         void Update(T entity);
+        Task UpdateAsync(T entity);
         void Delete(T entity);
         Task SaveAsync();
         IQueryable<T> GetQueryable();

@@ -48,6 +48,36 @@ namespace IndustryX.Application.Services
 
         public async Task<Warehouse?> GetByIdAsync(int id) => await _warehouseRepository.GetByIdAsync(id);
 
+        public async Task SetMainWarehouseAsync(int warehouseId, string type)
+        {
+            var allWarehouses = await _warehouseRepository.GetAllAsync();
+
+            foreach (var warehouse in allWarehouses)
+            {
+                bool shouldBeMain = warehouse.Id == warehouseId;
+                bool hasChanged = false;
+
+                if (type == "product" && warehouse.IsMainForProduct != shouldBeMain)
+                {
+                    warehouse.IsMainForProduct = shouldBeMain;
+                    hasChanged = true;
+                }
+                else if (type == "raw" && warehouse.IsMainForRawMaterial != shouldBeMain)
+                {
+                    warehouse.IsMainForRawMaterial = shouldBeMain;
+                    hasChanged = true;
+                }
+                else if (type == "sales" && warehouse.IsMainForSalesProduct != shouldBeMain)
+                {
+                    warehouse.IsMainForSalesProduct = shouldBeMain;
+                    hasChanged = true;
+                }
+
+                if (hasChanged)
+                    await _warehouseRepository.UpdateAsync(warehouse);
+            }
+        }
+
         public async Task<(bool Success, string? ErrorMessage)> AddWithInitialStocksAsync(Warehouse warehouse)
         {
             var nameExists = await _warehouseRepository.AnyAsync(w => w.Name.ToLower() == warehouse.Name.ToLower());

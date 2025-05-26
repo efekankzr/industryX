@@ -11,12 +11,49 @@
     </div>
 
     <!-- Özet Kartlar -->
-    <div class="row g-4 mb-4">
+    <!-- Özet Kartlar - Satır 1 -->
+    <div class="row g-4 mb-2">
         <div class="col-md-6 col-xl-3">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
                     <h6 class="text-muted">Total Products</h6>
                     <h3 class="fw-bold">@Model.TotalProducts</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Sales Products</h6>
+                    <h3 class="fw-bold">@Model.TotalSalesProducts</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Customers</h6>
+                    <h3 class="fw-bold">@Model.TotalCustomers</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted">Total Staff</h6>
+                    <h3 class="fw-bold">@Model.TotalStaff</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Özet Kartlar - Satır 2 -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h6 class="text-muted">Delivered Orders</h6>
+                    <h3 class="fw-bold">@Model.DeliveredOrders</h3>
                 </div>
             </div>
         </div>
@@ -31,8 +68,8 @@
         <div class="col-md-6 col-xl-3">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <h6 class="text-muted">Total Users</h6>
-                    <h3 class="fw-bold">@Model.TotalUsers</h3>
+                    <h6 class="text-muted">Total Staff</h6>
+                    <h3 class="fw-bold">@Model.TotalStaff</h3>
                 </div>
             </div>
         </div>
@@ -85,7 +122,7 @@
 
     <!-- Kritik Stoklar -->
     <div class="row g-4 mb-4">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="card border-danger shadow-sm">
                 <div class="card-header bg-danger text-white">⚠️ Critical Product Stocks</div>
                 <div class="card-body p-2">
@@ -108,7 +145,8 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+
+        <div class="col-md-4">
             <div class="card border-warning shadow-sm">
                 <div class="card-header bg-warning">⚠️ Critical Raw Material Stocks</div>
                 <div class="card-body p-2">
@@ -131,18 +169,42 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-md-4">
+            <div class="card border-info shadow-sm">
+                <div class="card-header bg-info text-white">⚠️ Critical Sales Product Stocks</div>
+                <div class="card-body p-2">
+                    @if (Model.CriticalSalesProductStocks.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var item in Model.CriticalSalesProductStocks)
+                            {
+                                <li class="list-group-item d-flex justify-content-between">
+                                    @item.Name
+                                    <span class="badge bg-info text-dark">@item.Stock / @item.CriticalStock</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">All sales product stocks are sufficient.</p>
+                    }
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Üretim Planı -->
     <div class="row g-4 mb-4">
         <div class="col-md-6">
             <div class="card shadow-sm">
-                <div class="card-header bg-light">🛠️ Today's Productions</div>
+                <div class="card-header bg-light">🛠️ Planned Productions</div>
                 <div class="card-body p-2">
-                    @if (Model.TodaysProductions.Any())
+                    @if (Model.PlannedProductions.Any())
                     {
                         <ul class="list-group list-group-flush">
-                            @foreach (var item in Model.TodaysProductions)
+                            @foreach (var item in Model.PlannedProductions)
                             {
                                 <li class="list-group-item d-flex justify-content-between">
                                     @item.ProductName
@@ -153,19 +215,19 @@
                     }
                     else
                     {
-                        <p class="text-muted">No production scheduled for today.</p>
+                        <p class="text-muted">No production scheduled.</p>
                     }
                 </div>
             </div>
         </div>
         <div class="col-md-6">
             <div class="card shadow-sm">
-                <div class="card-header bg-light">🛠️ Tomorrow's Productions</div>
+                <div class="card-header bg-light">🛠️ Active Productions</div>
                 <div class="card-body p-2">
-                    @if (Model.TomorrowsProductions.Any())
+                    @if (Model.ActiveProductions.Any())
                     {
                         <ul class="list-group list-group-flush">
-                            @foreach (var item in Model.TomorrowsProductions)
+                            @foreach (var item in Model.ActiveProductions)
                             {
                                 <li class="list-group-item d-flex justify-content-between">
                                     @item.ProductName
@@ -176,7 +238,7 @@
                     }
                     else
                     {
-                        <p class="text-muted">No production scheduled for tomorrow.</p>
+                        <p class="text-muted">No active production scheduled.</p>
                     }
                 </div>
             </div>

@@ -1,29 +1,33 @@
 ﻿@model IndustryX.WebUI.ViewModels.ProductCardViewModel
 
-<div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+<div class="card shadow border-0 rounded-4 overflow-hidden h-100">
     <a asp-controller="Shop" asp-action="Details" asp-route-url="@Model.Product.Url" class="text-decoration-none">
-        <div class="position-relative" style="height: 250px; background-color: #f8f9fa;">
+        <div class="ratio ratio-4x3 bg-light">
             <img src="@Model.Product.ImagePath"
-                 class="card-img-top position-absolute top-50 start-50 translate-middle"
                  alt="@Model.Product.Name"
-                 style="max-height: 100%; max-width: 100%; object-fit: contain;" />
+                 class="img-fluid w-100 h-100"
+                 style="object-fit: contain;" />
         </div>
     </a>
 
-    <div class="card-body text-center">
-        <h6 class="card-title text-dark fw-semibold">@Model.Product.Name</h6>
-        <p class="card-text text-primary fw-bold mb-2">@Model.Product.Price.ToString("C")</p>
+    <div class="card-body text-center py-2">
+        <h6 class="fw-semibold text-dark text-truncate mb-1" title="@Model.Product.Name">
+            @Model.Product.Name
+        </h6>
+        <p class="fw-bold text-primary mb-0">
+            @Model.Product.Price.ToString("C")
+        </p>
     </div>
 
-    <div class="card-footer bg-white border-top-0 d-flex justify-content-around p-2">
-        <form asp-controller="Shop" asp-action="AddToCart" asp-route-id="@Model.Product.Id" method="post" class="me-1">
-            <button type="submit" class="btn btn-sm btn-success w-100">
+    <div class="card-footer bg-white border-top-0 d-flex gap-2 p-2 pt-0">
+        <form asp-controller="Shop" asp-action="AddToCart" asp-route-id="@Model.Product.Id" method="post" class="flex-fill">
+            <button type="submit" class="btn btn-success w-100">
                 <i class="fas fa-cart-plus me-1"></i> Add
             </button>
         </form>
 
-        <form asp-controller="Shop" asp-action="AddToWishlist" asp-route-id="@Model.Product.Id" method="post" class="ms-1">
-            <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+        <form asp-controller="Shop" asp-action="AddToWishlist" asp-route-id="@Model.Product.Id" method="post" class="flex-fill">
+            <button type="submit" class="btn btn-outline-danger w-100">
                 <i class="fas fa-heart"></i>
             </button>
         </form>

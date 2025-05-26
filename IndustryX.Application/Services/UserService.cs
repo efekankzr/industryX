@@ -76,5 +76,28 @@ namespace IndustryX.Application.Services
             var user = await _userManager.FindByIdAsync(userId);
             return user?.WarehouseId;
         }
+
+        public async Task<int> GetUserCountByRoleAsync(string role)
+        {
+            var usersInRole = await _userManager.GetUsersInRoleAsync(role);
+            return usersInRole.Count;
+        }
+
+        public async Task<int> GetStaffCountAsync()
+        {
+            var users = await _userManager.Users.AsNoTracking().ToListAsync();
+            int staffCount = 0;
+
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                if (roles.Any() && !roles.Contains("Customer") && !roles.Contains("Admin"))
+                {
+                    staffCount++;
+                }
+            }
+
+            return staffCount;
+        }
     }
 }

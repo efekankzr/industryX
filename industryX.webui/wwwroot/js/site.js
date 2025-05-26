@@ -1,12 +1,12 @@
-﻿(document).ready(function () {
+﻿$(document).ready(function () {
+    // DataTable kurulumu
     $('#Table').DataTable({
         language: {
             url: '/lib/datatables/i18n/Turkish.json'
         }
     });
-});
 
-document.addEventListener("DOMContentLoaded", () => {
+    // Sayfa animasyonu
     const main = document.querySelector("main");
     if (main) {
         main.style.opacity = 0;

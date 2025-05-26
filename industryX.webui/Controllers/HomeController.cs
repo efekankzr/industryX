@@ -124,8 +124,14 @@ namespace IndustryX.WebUI.Controllers
             var model = await GetSetupStatusAsync();
 
             model.TotalProducts = (await _productService.GetAllAsync()).Count();
-            model.TotalUsers = (await _userService.GetAllAsync()).Count();
+            model.TotalSalesProducts = (await _salesProductService.GetAllAsync()).Count();
+            var users = await _userService.GetAllAsync();
+
+            model.TotalCustomers = await _userService.GetUserCountByRoleAsync("Customer");
+            model.TotalStaff = await _userService.GetStaffCountAsync();
+
             model.PendingOrders = await _orderService.GetOrderCountByStatusAsync(OrderStatus.Pending);
+            model.DeliveredOrders = await _orderService.GetOrderCountByStatusAsync(OrderStatus.Delivered);
             model.TotalRevenue = await _orderService.GetTotalRevenueAsync();
 
             var recentOrders = await _orderService.GetRecentOrdersAsync(5);
@@ -156,25 +162,36 @@ namespace IndustryX.WebUI.Controllers
                 Type = "RawMaterial"
             }).ToList();
 
+            model.CriticalSalesProductStocks = (await _salesProductService.GetCriticalStocksAsync()).Select(sp => new StockAlertItem
+            {
+                Name = sp.SalesProduct.Name,
+                Stock = (int)sp.Stock,
+                CriticalStock = (int)sp.CriticalStock,
+                Type = "SalesProduct"
+            }).ToList();
+
             var productions = await _productionService.GetAllAsync();
 
-            model.TodaysProductions = productions
-                .Where(p => p.StartTime?.Date == DateTime.Today)
+            model.PlannedProductions = productions
+                .Where(p => p.Status == ProductionStatus.Planned)
                 .Select(p => new ProductionPlanItem
                 {
                     ProductName = p.Product.Name,
                     BoxQuantity = p.BoxQuantity,
-                    StartTime = p.StartTime ?? DateTime.Today
-                }).ToList();
+                    StartTime = p.StartTime ?? p.CreatedAt
+                })
+                .ToList();
 
-            model.TomorrowsProductions = productions
-                .Where(p => p.StartTime?.Date == DateTime.Today.AddDays(1))
+            model.ActiveProductions = productions
+                .Where(p => p.Status == ProductionStatus.InProgress || p.Status == ProductionStatus.Paused)
                 .Select(p => new ProductionPlanItem
                 {
                     ProductName = p.Product.Name,
                     BoxQuantity = p.BoxQuantity,
-                    StartTime = p.StartTime ?? DateTime.Today.AddDays(1)
-                }).ToList();
+                    StartTime = p.StartTime ?? p.CreatedAt
+                })
+                .ToList();
+
 
             return View(model);
         }

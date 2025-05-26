@@ -155,6 +155,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\images\sections\" />
+    <Folder Include="wwwroot\uploads\sales\" />
   </ItemGroup>
 
 </Project>

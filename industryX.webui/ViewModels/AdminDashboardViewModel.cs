@@ -38,15 +38,19 @@
         }
 
         public int TotalProducts { get; set; }
-        public int TotalUsers { get; set; }
+        public int TotalSalesProducts { get; set; }
+        public int TotalCustomers { get; set; }
+        public int TotalStaff { get; set; }
         public int PendingOrders { get; set; }
+        public int DeliveredOrders { get; set; }
         public decimal TotalRevenue { get; set; }
 
         public List<RecentOrderViewModel> RecentOrders { get; set; } = new();
         public List<StockAlertItem> CriticalProductStocks { get; set; } = new();
         public List<StockAlertItem> CriticalRawMaterialStocks { get; set; } = new();
-        public List<ProductionPlanItem> TodaysProductions { get; set; } = new();
-        public List<ProductionPlanItem> TomorrowsProductions { get; set; } = new();
+        public List<StockAlertItem> CriticalSalesProductStocks { get; set; } = new();
+        public List<ProductionPlanItem> PlannedProductions { get; set; } = new();
+        public List<ProductionPlanItem> ActiveProductions { get; set; } = new();
         public List<int> SalesChartData { get; set; } = new();
     }
 

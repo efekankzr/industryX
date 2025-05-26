@@ -141,5 +141,15 @@ namespace IndustryX.Application.Services
                 .Where(p => p.IsActive && p.IsPopular)
                 .ToListAsync();
         }
+
+        public async Task<List<SalesProductStock>> GetCriticalStocksAsync()
+        {
+            return await _salesProductStockRepository
+                .GetQueryable()
+                .Include(rs => rs.SalesProduct)
+                .Include(rs => rs.Warehouse)
+                .Where(rs => rs.Stock < rs.CriticalStock)
+                .ToListAsync();
+        }
     }
 }

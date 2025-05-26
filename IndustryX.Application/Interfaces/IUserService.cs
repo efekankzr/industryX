@@ -12,5 +12,7 @@ namespace IndustryX.Application.Interfaces
         Task<IEnumerable<ApplicationUser>> GetByRoleAsync(string role);
         Task<int?> GetUserWarehouseIdAsync(string userId);
         Task<IList<string>> GetRolesAsync(string userId);
+        Task<int> GetUserCountByRoleAsync(string role);
+        Task<int> GetStaffCountAsync() ;
     }
 }
