@@ -22,7 +22,6 @@ namespace IndustryX.WebUI.Controllers
         {
             var orders = await _orderService.GetAllAsync();
 
-            // Apply filters
             if (!string.IsNullOrWhiteSpace(status))
                 orders = orders.Where(o => o.Status.ToString() == status).ToList();
 
@@ -35,14 +34,12 @@ namespace IndustryX.WebUI.Controllers
             if (endDate.HasValue)
                 orders = orders.Where(o => o.CreatedAt <= endDate.Value).ToList();
 
-            // Pagination
             int totalCount = orders.Count;
             var pagedOrders = orders
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
 
-            // ViewBag for pagination and filters
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalCount / pageSize);
             ViewBag.PageSize = pageSize;

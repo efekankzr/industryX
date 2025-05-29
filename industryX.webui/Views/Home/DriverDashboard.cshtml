@@ -1,66 +1,93 @@
-﻿@model List<IndustryX.Domain.Entities.ProductTransfer>
-
+﻿@model DriverDashboardViewModel
 @{
     ViewData["Title"] = "Driver Dashboard";
-    var transferCount = Model.Count;
 }
 
-<div class="container-fluid px-4">
-    <h2 class="mb-4">
-        <i class="fas fa-truck me-2"></i>Driver Dashboard
-    </h2>
-
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card border-success shadow-sm">
-                <div class="card-body text-success">
-                    <h5 class="card-title">
-                        <i class="fas fa-box me-2"></i>Transfers Ready
-                    </h5>
-                    <p class="fs-4 fw-bold mb-0">@transferCount</p>
-                </div>
-            </div>
-        </div>
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Driver Dashboard</h2>
+        <span class="text-muted">@DateTime.Now.ToString("MMMM dd, yyyy")</span>
     </div>
 
-    @if (!Model.Any())
-    {
-        <div class="alert alert-info shadow-sm">
-            <i class="fas fa-info-circle me-2"></i>
-            There are no products currently ready for transfer.
+    <!-- Taşımaya Hazır Transferler -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">🚚 Transfers Ready for Pickup</h5>
         </div>
-    }
-    else
-    {
-        <div class="card shadow-sm">
-            <div class="card-header bg-light fw-semibold">
-                <i class="fas fa-list me-2"></i>Products Ready for Transfer
-            </div>
-            <div class="card-body p-0">
+        <div class="card-body p-0">
+            @if (Model.TransfersToPickup.Any())
+            {
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
+                            <th>Barcode</th>
                             <th>Product</th>
-                            <th>Quantity (Boxes)</th>
-                            <th>Source Warehouse</th>
-                            <th>Destination Warehouse</th>
-                            <th>Created At</th>
+                            <th>Quantity (Box)</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Created</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Model)
+                        @foreach (var transfer in Model.TransfersToPickup)
                         {
                             <tr>
-                                <td>@item.Product.Name</td>
-                                <td>@item.TransferQuantityBox</td>
-                                <td>@item.SourceWarehouse.Name</td>
-                                <td>@item.DestinationWarehouse.Name</td>
-                                <td>@item.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                                <td>@transfer.TransferBarcode</td>
+                                <td>@transfer.ProductName</td>
+                                <td>@transfer.Quantity</td>
+                                <td>@transfer.SourceWarehouse</td>
+                                <td>@transfer.DestinationWarehouse</td>
+                                <td>@transfer.CreatedAt.ToString("g")</td>
                             </tr>
                         }
                     </tbody>
                 </table>
-            </div>
+            }
+            else
+            {
+                <div class="p-3 text-muted">No transfers ready for pickup.</div>
+            }
         </div>
-    }
+    </div>
+
+    <!-- Zimmetler -->
+    <div class="card shadow-sm border-warning mb-4">
+        <div class="card-header bg-warning text-dark">
+            ⚠️ Your Remaining Transfer Deficits
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Deficits.Any())
+            {
+                <table class="table table-sm table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Transfer</th>
+                            <th>Product</th>
+                            <th>Deficit</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Delivered At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var d in Model.Deficits)
+                        {
+                            <tr>
+                                <td>@d.TransferBarcode</td>
+                                <td>@d.ProductName</td>
+                                <td>@d.DeficitQuantity</td>
+                                <td>@d.SourceWarehouse</td>
+                                <td>@d.DestinationWarehouse</td>
+                                <td>@d.DeliveredAt.ToString("g")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="p-3 text-muted">You have no outstanding deficits.</div>
+            }
+        </div>
+    </div>
 </div>

@@ -13,5 +13,6 @@ namespace IndustryX.Domain.Interfaces
         Task SaveAsync();
         IQueryable<T> GetQueryable();
         Task<bool> AnyAsync(Expression<Func<T, bool>> predicate);
+        void DeleteRange(IEnumerable<T> entities);
     }
 }

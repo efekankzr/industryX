@@ -1,4 +1,5 @@
-﻿using IndustryX.Application.Interfaces;
+﻿using System.Security.Claims;
+using IndustryX.Application.Interfaces;
 using IndustryX.Domain.Entities;
 using IndustryX.WebUI.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -202,22 +203,174 @@ namespace IndustryX.WebUI.Controllers
         [Authorize(Roles = "Driver")]
         public async Task<IActionResult> DriverDashboard()
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var deficits = await _productTransferService.GetDeliveredTransfersWithUserDeficitsAsync(userId);
             var transfers = await _productTransferService.GetAllCreatedTransfersAsync();
-            return View(transfers);
+
+            var model = new DriverDashboardViewModel
+            {
+                TransfersToPickup = transfers.Select(t => new TransferViewModel
+                {
+                    Id = t.Id,
+                    TransferBarcode = t.TransferBarcode,
+                    ProductName = t.Product.Name,
+                    Quantity = t.TransferQuantityBox,
+                    SourceWarehouse = t.SourceWarehouse.Name,
+                    DestinationWarehouse = t.DestinationWarehouse.Name,
+                    CreatedAt = t.CreatedAt,
+                    Status = t.Status.ToString()
+                }).ToList(),
+
+                Deficits = deficits.Select(d => new UserDeficitViewModel
+                {
+                    TransferBarcode = d.ProductTransfer.TransferBarcode,
+                    ProductName = d.Product.Name,
+                    DeficitQuantity = d.DeficitQuantity,
+                    SourceWarehouse = d.ProductTransfer.SourceWarehouse.Name,
+                    DestinationWarehouse = d.ProductTransfer.DestinationWarehouse.Name,
+                    DeliveredAt = d.ProductTransfer.DeliveredAt ?? DateTime.MinValue
+                }).ToList()
+            };
+
+            return View(model);
         }
 
         [Authorize(Roles = "WarehouseManager")]
         public async Task<IActionResult> WarehouseManagerDashboard()
         {
-            var transfers = await _productTransferService.GetAllInTransitTransfersAsync();
-            return View(transfers);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var currentUser = await _userService.GetByIdAsync(userId);
+            var warehouseId = currentUser?.WarehouseId;
+
+            if (warehouseId == null)
+                return Forbid();
+
+            var inTransitTransfers = await _productTransferService.GetAllAsync(t =>
+                t.DestinationWarehouseId == warehouseId && t.Status == TransferStatus.InTransit);
+
+            var outgoingCreatedTransfers = await _productTransferService.GetAllAsync(t =>
+                t.SourceWarehouseId == warehouseId && t.Status == TransferStatus.Created);
+
+            var deficits = await _productTransferService.GetDeliveredTransfersWithUserDeficitsAsync(userId);
+
+            var model = new WarehouseTransferDashboardViewModel
+            {
+                IncomingTransfers = inTransitTransfers.Select(t => new TransferViewModel
+                {
+                    Id = t.Id,
+                    TransferBarcode = t.TransferBarcode,
+                    ProductName = t.Product.Name,
+                    Quantity = t.TransferQuantityBox,
+                    SourceWarehouse = t.SourceWarehouse.Name,
+                    DestinationWarehouse = t.DestinationWarehouse.Name,
+                    CreatedAt = t.CreatedAt,
+                    Status = t.Status.ToString()
+                }).ToList(),
+
+                OutgoingTransfers = outgoingCreatedTransfers.Select(t => new TransferViewModel
+                {
+                    Id = t.Id,
+                    TransferBarcode = t.TransferBarcode,
+                    ProductName = t.Product.Name,
+                    Quantity = t.TransferQuantityBox,
+                    SourceWarehouse = t.SourceWarehouse.Name,
+                    DestinationWarehouse = t.DestinationWarehouse.Name,
+                    CreatedAt = t.CreatedAt,
+                    Status = t.Status.ToString()
+                }).ToList(),
+
+                Deficits = deficits.Select(d => new UserDeficitViewModel
+                {
+                    TransferBarcode = d.ProductTransfer.TransferBarcode,
+                    ProductName = d.Product.Name,
+                    DeficitQuantity = d.DeficitQuantity,
+                    SourceWarehouse = d.ProductTransfer.SourceWarehouse.Name,
+                    DestinationWarehouse = d.ProductTransfer.DestinationWarehouse.Name,
+                    DeliveredAt = d.ProductTransfer.DeliveredAt ?? DateTime.MinValue
+                }).ToList()
+            };
+
+            return View(model);
         }
 
         [Authorize(Roles = "ProductionManager")]
-        public IActionResult ProductionManagerDashboard() => View();
+        public async Task<IActionResult> ProductionManagerDashboard()
+        {
+            var model = new AdminDashboardViewModel();
+
+            model.CriticalProductStocks = (await _productService.GetCriticalStocksAsync()).Select(ps => new StockAlertItem
+            {
+                Name = ps.Product.Name,
+                Stock = ps.Stock,
+                CriticalStock = ps.QruicalStock,
+                Type = "Product"
+            }).ToList();
+
+            model.CriticalRawMaterialStocks = (await _rawMaterialService.GetCriticalStocksAsync()).Select(rs => new StockAlertItem
+            {
+                Name = rs.RawMaterial.Name,
+                Stock = (int)rs.Stock,
+                CriticalStock = (int)rs.QruicalStock,
+                Type = "RawMaterial"
+            }).ToList();
+
+            model.CriticalSalesProductStocks = (await _salesProductService.GetCriticalStocksAsync()).Select(sp => new StockAlertItem
+            {
+                Name = sp.SalesProduct.Name,
+                Stock = (int)sp.Stock,
+                CriticalStock = (int)sp.CriticalStock,
+                Type = "SalesProduct"
+            }).ToList();
+
+            var productions = await _productionService.GetAllAsync();
+
+            model.PlannedProductions = productions
+                .Where(p => p.Status == ProductionStatus.Planned)
+                .Select(p => new ProductionPlanItem
+                {
+                    ProductName = p.Product.Name,
+                    BoxQuantity = p.BoxQuantity,
+                    StartTime = p.StartTime ?? p.CreatedAt
+                })
+                .ToList();
+
+            model.ActiveProductions = productions
+                .Where(p => p.Status == ProductionStatus.InProgress || p.Status == ProductionStatus.Paused)
+                .Select(p => new ProductionPlanItem
+                {
+                    ProductName = p.Product.Name,
+                    BoxQuantity = p.BoxQuantity,
+                    StartTime = p.StartTime ?? p.CreatedAt
+                })
+                .ToList();
+
+            return View(model);
+        }
 
         [Authorize(Roles = "SalesManager")]
-        public IActionResult SalesManagerDashboard() => View();
+        public async Task<IActionResult> SalesManagerDashboard()
+        {
+            var model = new AdminDashboardViewModel();
+
+            model.TotalSalesProducts = (await _salesProductService.GetAllAsync()).Count();
+            model.TotalCustomers = await _userService.GetUserCountByRoleAsync("Customer");
+            model.PendingOrders = await _orderService.GetOrderCountByStatusAsync(OrderStatus.Pending);
+            model.TotalRevenue = await _orderService.GetTotalRevenueAsync();
+
+            var recentOrders = await _orderService.GetRecentOrdersAsync(5);
+            model.RecentOrders = recentOrders.Select(o => new RecentOrderViewModel
+            {
+                Id = o.Id,
+                CustomerName = o.User.Firstname,
+                TotalPrice = o.TotalPrice,
+                Status = o.Status.ToString(),
+                CreatedAt = o.CreatedAt
+            }).ToList();
+
+            model.SalesChartData = await _orderService.GetWeeklySalesChartDataAsync();
+
+            return View(model);
+        }
 
         // -------------------------------
         // Setup Status Check

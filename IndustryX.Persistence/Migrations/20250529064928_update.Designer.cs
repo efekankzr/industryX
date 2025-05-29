@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IndustryX.Persistence.Migrations
 {
     [DbContext(typeof(IndustryXDbContext))]
-    [Migration("20250522075703_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250529064928_update")]
+    partial class update
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -170,6 +170,28 @@ namespace IndustryX.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("LaborCosts");
+                });
+
+            modelBuilder.Entity("IndustryX.Domain.Entities.LocationLog", b =>
+                {
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("VehicleId");
+
+                    b.ToTable("LocationLogs");
                 });
 
             modelBuilder.Entity("IndustryX.Domain.Entities.Order", b =>
@@ -683,6 +705,51 @@ namespace IndustryX.Persistence.Migrations
                     b.ToTable("UserAddresses");
                 });
 
+            modelBuilder.Entity("IndustryX.Domain.Entities.Vehicle", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DeviceId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PlateNumber")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Vehicles");
+                });
+
+            modelBuilder.Entity("IndustryX.Domain.Entities.VehicleUser", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("VehicleId");
+
+                    b.ToTable("VehicleUsers");
+                });
+
             modelBuilder.Entity("IndustryX.Domain.Entities.Warehouse", b =>
                 {
                     b.Property<int>("Id")
@@ -930,6 +997,17 @@ namespace IndustryX.Persistence.Migrations
                     b.Navigation("SalesProduct");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("IndustryX.Domain.Entities.LocationLog", b =>
+                {
+                    b.HasOne("IndustryX.Domain.Entities.Vehicle", "Vehicle")
+                        .WithOne("LocationLog")
+                        .HasForeignKey("IndustryX.Domain.Entities.LocationLog", "VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("IndustryX.Domain.Entities.Order", b =>
@@ -1239,6 +1317,25 @@ namespace IndustryX.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("IndustryX.Domain.Entities.VehicleUser", b =>
+                {
+                    b.HasOne("IndustryX.Domain.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("IndustryX.Domain.Entities.Vehicle", "Vehicle")
+                        .WithMany("VehicleUsers")
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+
+                    b.Navigation("Vehicle");
+                });
+
             modelBuilder.Entity("IndustryX.Domain.Entities.WishlistItem", b =>
                 {
                     b.HasOne("IndustryX.Domain.Entities.SalesProduct", "SalesProduct")
@@ -1370,6 +1467,13 @@ namespace IndustryX.Persistence.Migrations
                     b.Navigation("Images");
 
                     b.Navigation("SalesProductCategories");
+                });
+
+            modelBuilder.Entity("IndustryX.Domain.Entities.Vehicle", b =>
+                {
+                    b.Navigation("LocationLog");
+
+                    b.Navigation("VehicleUsers");
                 });
 
             modelBuilder.Entity("IndustryX.Domain.Entities.Warehouse", b =>

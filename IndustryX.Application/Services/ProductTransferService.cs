@@ -1,4 +1,5 @@
-﻿using IndustryX.Application.Interfaces;
+﻿using System.Linq.Expressions;
+using IndustryX.Application.Interfaces;
 using IndustryX.Domain.Entities;
 using IndustryX.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +35,36 @@ namespace IndustryX.Application.Services
                 .Include(t => t.InitiatedByUser)
                 .Include(t => t.DeliveredByUser)
                 .Include(t => t.ReceivedByUser)
+                .ToListAsync();
+        }
+
+        public async Task<List<ProductTransfer>> GetAllAsync(Expression<Func<ProductTransfer, bool>> predicate)
+        {
+            return await _transferRepository
+                .GetQueryable()
+                .Include(t => t.Product)
+                .Include(t => t.SourceWarehouse)
+                .Include(t => t.DestinationWarehouse)
+                .Include(t => t.InitiatedByUser)
+                .Include(t => t.DeliveredByUser)
+                .Include(t => t.ReceivedByUser)
+                .Where(predicate)
+                .ToListAsync();
+        }
+
+        public async Task<List<ProductTransferDeficit>> GetDeliveredTransfersWithUserDeficitsAsync(string userId)
+        {
+            return await _deficitRepository
+                .GetQueryable()
+                .Include(d => d.Product)
+                .Include(d => d.ProductTransfer)
+                    .ThenInclude(t => t.SourceWarehouse)
+                .Include(d => d.ProductTransfer)
+                    .ThenInclude(t => t.DestinationWarehouse)
+                .Where(d =>
+                    d.UserId == userId &&
+                    d.DeficitQuantity > 0 &&
+                    d.ProductTransfer.Status == TransferStatus.Delivered)
                 .ToListAsync();
         }
 

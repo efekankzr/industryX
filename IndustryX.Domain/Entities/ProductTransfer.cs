@@ -36,8 +36,8 @@
 
     public enum TransferStatus
     {
-        Created = 0,         // Transfer oluşturuldu ama işlem başlamadı
-        InTransit = 1,       // Ürün yolda (taşıyıcı teslim aldı)
-        Delivered = 2        // Teslim tamamlandı
+        Created = 0,
+        InTransit = 1,
+        Delivered = 2
     }
 }

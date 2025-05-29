@@ -1,5 +1,137 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model AdminDashboardViewModel
 @{
+    ViewData["Title"] = "Production Manager Dashboard";
 }
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Production Manager Dashboard</h2>
+        <span class="text-muted">@DateTime.Now.ToString("MMMM dd, yyyy")</span>
+    </div>
+
+    <!-- Kritik Stoklar -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card border-danger shadow-sm">
+                <div class="card-header bg-danger text-white">⚠️ Critical Product Stocks</div>
+                <div class="card-body p-2">
+                    @if (Model.CriticalProductStocks.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var item in Model.CriticalProductStocks)
+                            {
+                                <li class="list-group-item d-flex justify-content-between">
+                                    @item.Name
+                                    <span class="badge bg-danger">@item.Stock / @item.CriticalStock</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">All product stocks are sufficient.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-warning shadow-sm">
+                <div class="card-header bg-warning">⚠️ Critical Raw Material Stocks</div>
+                <div class="card-body p-2">
+                    @if (Model.CriticalRawMaterialStocks.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var item in Model.CriticalRawMaterialStocks)
+                            {
+                                <li class="list-group-item d-flex justify-content-between">
+                                    @item.Name
+                                    <span class="badge bg-warning text-dark">@item.Stock / @item.CriticalStock</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">All raw materials are sufficient.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-info shadow-sm">
+                <div class="card-header bg-info text-white">⚠️ Critical Sales Product Stocks</div>
+                <div class="card-body p-2">
+                    @if (Model.CriticalSalesProductStocks.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var item in Model.CriticalSalesProductStocks)
+                            {
+                                <li class="list-group-item d-flex justify-content-between">
+                                    @item.Name
+                                    <span class="badge bg-info text-dark">@item.Stock / @item.CriticalStock</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">All sales product stocks are sufficient.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Üretim Planı -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">🛠️ Planned Productions</div>
+                <div class="card-body p-2">
+                    @if (Model.PlannedProductions.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var item in Model.PlannedProductions)
+                            {
+                                <li class="list-group-item d-flex justify-content-between">
+                                    @item.ProductName
+                                    <span class="badge bg-primary">@item.BoxQuantity box</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No planned production.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">⚙️ Active Productions</div>
+                <div class="card-body p-2">
+                    @if (Model.ActiveProductions.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var item in Model.ActiveProductions)
+                            {
+                                <li class="list-group-item d-flex justify-content-between">
+                                    @item.ProductName
+                                    <span class="badge bg-secondary">@item.BoxQuantity box</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No active production.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

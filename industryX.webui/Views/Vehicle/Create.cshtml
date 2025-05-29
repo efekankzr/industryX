@@ -1,0 +1,54 @@
+﻿@model IndustryX.Domain.Entities.Vehicle
+
+@{
+    ViewData["Title"] = "Add New Vehicle";
+}
+
+<div class="my-4 p-4 bg-light shadow-sm rounded">
+    <h2 class="text-primary text-center mb-3">
+        <i class="fas fa-truck"></i> Add New Vehicle
+    </h2>
+    <hr />
+
+    <form asp-action="Create" method="post">
+        <div class="row">
+            <!-- Left Column: Vehicle Info -->
+            <div class="col-md-6 border-end">
+                <div class="mb-3">
+                    <label asp-for="PlateNumber" class="form-label">Plate Number</label>
+                    <input asp-for="PlateNumber" class="form-control" placeholder="Enter plate number" required />
+                    <span asp-validation-for="PlateNumber" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="DeviceId" class="form-label">Device ID</label>
+                    <input asp-for="DeviceId" class="form-control" placeholder="Enter device ID" required />
+                    <span asp-validation-for="DeviceId" class="text-danger small"></span>
+                </div>
+            </div>
+            <!-- Right Column: Info/Helper -->
+            <div class="col-md-6 d-flex align-items-center justify-content-center">
+                <div class="text-muted text-center">
+                    <i class="fas fa-info-circle fa-2x mb-3"></i>
+                    <p>
+                        Please provide the vehicle’s <strong>plate number</strong> and the <strong>device ID</strong> for GPS tracking.<br />
+                        After creation, you can assign drivers to this vehicle from the management screen.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4 d-flex gap-2 justify-content-end">
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save me-1"></i> Save
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

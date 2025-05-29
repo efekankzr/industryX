@@ -1,0 +1,101 @@
+﻿@model List<IndustryX.Domain.Entities.Vehicle>
+@{
+    ViewData["Title"] = "Vehicle Management";
+    var drivers = ViewBag.Drivers as List<ApplicationUser>;
+}
+
+<div class="my-4 p-4 bg-light shadow-sm rounded">
+    <h2 class="text-primary text-center mb-3">
+        <i class="fas fa-truck"></i> Vehicle Management
+    </h2>
+    <hr />
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <p class="text-secondary my-auto">You can manage all vehicles here.</p>
+        <a asp-action="Create" class="btn btn-success">
+            <i class="fas fa-plus-circle"></i> Add New Vehicle
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle text-center" id="VehicleTable">
+            <thead class="table-dark">
+                <tr>
+                    <th>Plate Number</th>
+                    <th>Device ID</th>
+                    <th>Driver</th>
+                    <th style="width: 180px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        var assigned = item.VehicleUsers?.FirstOrDefault()?.User;
+                        <tr>
+                            <td>@item.PlateNumber</td>
+                            <td>@item.DeviceId</td>
+                            <td>
+                                @if (assigned != null)
+                                {
+                                    <span>
+                                        <i class="fas fa-user-circle text-primary me-1"></i>
+                                        @($"{assigned.Firstname} {assigned.Surname}")
+                                    </span>
+                                    <form asp-action="RemoveDriver" asp-route-vehicleId="@item.Id" method="post" class="d-inline ms-2">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger"
+                                                title="Remove Driver"
+                                                onclick="return confirm('Remove driver from this vehicle?');">
+                                            <i class="fas fa-user-minus"></i>
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="AssignDriver" asp-route-vehicleId="@item.Id" method="post" class="d-flex gap-2 align-items-center justify-content-center">
+                                        @Html.AntiForgeryToken()
+                                        <select name="driverUserId" class="form-select form-select-sm" style="width: 160px;" required>
+                                            <option value="">Select driver</option>
+                                            @if (drivers != null)
+                                            {
+                                                foreach (var driver in drivers)
+                                                {
+                                                    <option value="@driver.Id">@driver.Firstname @driver.Surname (@driver.Email)</option>
+                                                }
+                                            }
+                                        </select>
+                                        <button type="submit" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-user-plus"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-1 justify-content-center">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline"
+                                          onsubmit="return confirm('Are you sure you want to delete this vehicle?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-muted">No vehicles found.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

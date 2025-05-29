@@ -4,7 +4,7 @@
 @{
     var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
     var isCustomer = User.IsInRole("Customer");
-    var isAdmin = User.IsInRole("Admin") || User.IsInRole("SalesManager") || User.IsInRole("Driver") || User.IsInRole("ProductionManager");
+    var isAdmin = User.IsInRole("Admin") || User.IsInRole("SalesManager") || User.IsInRole("Driver") || User.IsInRole("ProductionManager") || User.IsInRole("WarehouseManager");
 
     if (SignInManager.IsSignedIn(User))
     {

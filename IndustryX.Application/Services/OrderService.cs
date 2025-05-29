@@ -9,11 +9,21 @@ namespace IndustryX.Application.Services
     {
         private readonly IRepository<Order> _orderRepository;
         private readonly ICartService _cartService;
+        private readonly IRepository<Warehouse> _warehouseRepository;
+        private readonly IRepository<SalesProduct> _salesProductRepository;
+        private readonly IRepository<SalesProductStock> _stockRepository;
 
-        public OrderService(IRepository<Order> orderRepository, ICartService cartService)
+        public OrderService(IRepository<Order> orderRepository, 
+            ICartService cartService, 
+            IRepository<Warehouse> warehouseRepository, 
+            IRepository<SalesProductStock> stockRepository, 
+            IRepository<SalesProduct> salesProductRepository)
         {
             _orderRepository = orderRepository;
             _cartService = cartService;
+            _warehouseRepository = warehouseRepository;
+            _stockRepository = stockRepository;
+            _salesProductRepository = salesProductRepository;
         }
 
         public async Task<int> GetOrderCountByStatusAsync(OrderStatus status)
@@ -102,6 +112,35 @@ namespace IndustryX.Application.Services
         {
             await _orderRepository.AddAsync(order);
             await _orderRepository.SaveAsync();
+
+            var mainSalesWarehouse = await _warehouseRepository.GetQueryable()
+                .FirstOrDefaultAsync(w => w.IsMainForSalesProduct);
+
+            if (mainSalesWarehouse == null)
+                throw new Exception("Main warehouse for sales products is not configured.");
+
+            foreach (var item in order.OrderItems)
+            {
+                var salesProduct = await _salesProductRepository
+                    .GetQueryable()
+                    .FirstOrDefaultAsync(sp => sp.Id == item.SalesProductId);
+
+                if (salesProduct == null)
+                    throw new Exception($"Sales product with ID {item.SalesProductId} not found.");
+
+                var stock = await _stockRepository.GetQueryable()
+                    .FirstOrDefaultAsync(s =>
+                        s.SalesProductId == salesProduct.Id &&
+                        s.WarehouseId == mainSalesWarehouse.Id);
+
+                if (stock == null || stock.Stock < item.Quantity)
+                    throw new Exception($"Insufficient stock for product '{salesProduct.Name}' in main sales warehouse.");
+
+                stock.Stock -= item.Quantity;
+                _stockRepository.Update(stock);
+            }
+
+            await _stockRepository.SaveAsync();
         }
 
         public async Task<bool> MarkAsPaidAsync(int orderId, string paymentProvider = "", string transactionId = "")

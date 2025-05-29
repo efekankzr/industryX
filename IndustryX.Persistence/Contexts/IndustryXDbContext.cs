@@ -29,6 +29,10 @@ namespace IndustryX.Persistence.Contexts
         public DbSet<UserAddress> UserAddresses { get; set; }
         public DbSet<Warehouse> Warehouses { get; set; }
         public DbSet<WishlistItem> WishlistItems { get; set; }
+        public DbSet<Vehicle> Vehicles { get; set; }
+        public DbSet<VehicleUser> VehicleUsers { get; set; }
+        public DbSet<LocationLog> LocationLogs { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

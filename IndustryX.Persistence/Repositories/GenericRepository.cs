@@ -40,5 +40,10 @@ namespace IndustryX.Persistence.Repositories
         {
             return await _context.Set<T>().AnyAsync(predicate);
         }
+
+        public void DeleteRange(IEnumerable<T> entities)
+        {
+            _dbSet.RemoveRange(entities);
+        }
     }
 }
