@@ -1,0 +1,121 @@
+﻿@model List<IndustryX.Domain.Entities.Vehicle>
+@{
+    ViewData["Title"] = "Vehicle Live Tracking";
+}
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<div class="my-4 p-4 bg-light shadow-sm rounded">
+    <h2 class="text-primary text-center mb-3">
+        <i class="fas fa-map-marker-alt"></i> Vehicle Live Tracking
+    </h2>
+    <hr />
+
+    <div class="mb-3 d-flex justify-content-end gap-2">
+        <select id="vehicleSelect" class="form-select" style="width: 260px;">
+            <option value="">Show All Vehicles</option>
+            @foreach (var v in Model)
+            {
+                <option value="@v.Id">@v.PlateNumber</option>
+            }
+        </select>
+    </div>
+
+    <div id="map" style="width: 100%; height: 500px; border-radius: 8px;"></div>
+</div>
+
+@section Scripts {
+    <script>
+        let map = L.map('map').setView([39.9, 32.85], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        let markers = [];
+        let updateInterval = 15000; // 15 saniye
+        let refreshTimer = null;
+        let lastSelectedId = "";
+
+        function isValidCoordinate(lat, lng) {
+            if (typeof lat !== "number" || typeof lng !== "number") return false;
+            if (isNaN(lat) || isNaN(lng)) return false;
+            if (lat === 0 && lng === 0) return false;
+            return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+        }
+
+        function clearMarkers() {
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+        }
+
+        async function fetchAndShowAllVehicles() {
+            const res = await fetch('@Url.Action("GetAllLocations")');
+            const data = await res.json();
+            clearMarkers();
+            let anyValid = false;
+            data.forEach(v => {
+                const lat = Number(v.latitude);
+                const lng = Number(v.longitude);
+                if (isValidCoordinate(lat, lng)) {
+                    const marker = L.marker([lat, lng])
+                        .addTo(map)
+                        .bindPopup(`<b>${v.plateNumber}</b>`);
+                    markers.push(marker);
+                    anyValid = true;
+                }
+            });
+            if (anyValid && markers.length) {
+                let group = L.featureGroup(markers);
+                map.fitBounds(group.getBounds(), { padding: [40, 40] });
+            } else {
+                map.setView([39.9, 32.85], 6);
+            }
+        }
+
+        async function fetchAndShowSingleVehicle(id) {
+            if (!id) return;
+            const res = await fetch('@Url.Action("GetVehicleLocation")' + `?id=${id}`);
+            if (!res.ok) return;
+            const v = await res.json();
+            clearMarkers();
+            const lat = Number(v.latitude);
+            const lng = Number(v.longitude);
+            if (isValidCoordinate(lat, lng)) {
+                const marker = L.marker([lat, lng])
+                    .addTo(map)
+                    .bindPopup(`<b>${v.plateNumber}</b>`)
+                    .openPopup();
+                markers.push(marker);
+                map.setView([lat, lng], 13);
+            } else {
+                map.setView([39.9, 32.85], 6);
+            }
+        }
+
+        function refreshMap() {
+            const id = document.getElementById('vehicleSelect').value;
+            if (id) {
+                fetchAndShowSingleVehicle(id);
+            } else {
+                fetchAndShowAllVehicles();
+            }
+            lastSelectedId = id;
+        }
+
+        function startAutoRefresh() {
+            if (refreshTimer) clearInterval(refreshTimer);
+            refreshTimer = setInterval(refreshMap, updateInterval);
+        }
+
+        // İlk yükleme
+        refreshMap();
+        startAutoRefresh();
+
+        // Dropdown değiştiğinde
+        document.getElementById('vehicleSelect').addEventListener('change', function () {
+            refreshMap();
+            // Kullanıcı seçimi değiştirince hemen güncellenmesi için intervali sıfırla
+            startAutoRefresh();
+        });
+    </script>
+}

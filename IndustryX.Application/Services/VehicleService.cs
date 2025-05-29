@@ -116,5 +116,29 @@ namespace IndustryX.Application.Services
             var drivers = await _userManager.GetUsersInRoleAsync("Driver");
             return drivers.ToList();
         }
+
+        public async Task<List<Vehicle>> GetAllWithLocationAsync()
+        {
+            return await _vehicleRepository
+                .GetQueryable()
+                .Include(v => v.LocationLog)
+                .ToListAsync();
+        }
+
+        public async Task<Vehicle?> GetByIdWithLocationAsync(int id)
+        {
+            return await _vehicleRepository
+                .GetQueryable()
+                .Include(v => v.LocationLog)
+                .FirstOrDefaultAsync(v => v.Id == id);
+        }
+
+        public async Task<Vehicle?> GetByDeviceIdAsync(string deviceId)
+        {
+            return await _vehicleRepository
+                .GetQueryable()
+                .Include(v => v.LocationLog)
+                .FirstOrDefaultAsync(v => v.DeviceId == deviceId);
+        }
     }
 }

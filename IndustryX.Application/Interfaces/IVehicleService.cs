@@ -12,5 +12,8 @@ namespace IndustryX.Application.Interfaces
         Task<bool> AssignDriverAsync(int vehicleId, string driverUserId);
         Task RemoveDriverAsync(int vehicleId);
         Task<List<ApplicationUser>> GetAvailableDriversAsync();
+        Task<Vehicle?> GetByIdWithLocationAsync(int id);
+        Task<List<Vehicle>> GetAllWithLocationAsync();
+        Task<Vehicle?> GetByDeviceIdAsync(string deviceId);
     }
 }

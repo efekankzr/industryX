@@ -162,6 +162,22 @@
                 }
             }
 
+            @if (User.IsInRole("Admin"))
+            {
+                <li class="text-uppercase small text-muted mt-4 mb-1">Fleet</li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" asp-controller="Vehicle" asp-action="Index">
+                        <i class="fas fa-car me-2"></i> Vehicles
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" asp-controller="VehicleLocation" asp-action="Index">
+                        <i class="fas fa-map-marker-alt me-2"></i> Vehicle Locations
+                    </a>
+                </li>
+            }
+
+
             <!-- SETTINGS -->
             @if (User.IsInRole("Admin") || User.IsInRole("SalesManager"))
             {
