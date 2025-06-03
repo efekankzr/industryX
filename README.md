@@ -69,17 +69,10 @@ Email: admin@industryx.com
 
 📱 İlgili Uygulamalar
 - Mobil Uygulama – IndustryX Mobile (Android Studio & Java)
-  GitHub: https://github.com/efekankzr/IndustryX-Mobile
+  GitHub: [https://github.com/efekankzr/IndustryX-Mobile](https://github.com/efekankzr/mobileapp)
 
 - IoT Araç Takip Sistemi – ESP32 & SIM808
   GitHub: https://github.com/efekankzr/VehicleTracker
 
-🤝 Katkı Sağla
-1. Fork'la
-2. Branch oluştur (git checkout -b feature/yenilik)
-3. Commit yap (git commit -m 'Yeni özellik eklendi')
-4. Push et (git push origin feature/yenilik)
-5. Pull request gönder
-
 📄 Lisans
-Bu proje MIT lisansı ile lisanslanmıştır. Ayrıntılar için LICENSE dosyasını inceleyin.
+Bu proje MIT lisansı ile lisanslanmıştır.
