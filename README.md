@@ -8,8 +8,6 @@ IndustryX, üretim süreçlerini, hammadde tüketimini, stok yönetimini ve e-ti
 - Kullanım
 - Teknolojiler
 - İlgili Uygulamalar
-- Ekran Görüntüleri
-- Katkı Sağla
 - Lisans
 
 ✨ Özellikler
